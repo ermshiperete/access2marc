@@ -1,61 +1,36 @@
 import csv
 import pyodbc
+import codecs
 class Processor(object):
 
-	def __init__(self, xlsfile, dbalias):
-		self.map = csv.DictReader(xslfile)
-		self.conn = pyodbc.connect('DSN=%s')
+	def __init__(self, csvfile, dbconnstring):
+		with open(csvfile, 'r') as f:
+			reader = csv.DictReader(f)
+			self.instructions = [row for row in reader]
+		self.conn = pyodbc.connect(dbconnstring)
 		self.db = self.conn.cursor()
 
-		# load SQL statements into a dictionary
 
-		_prepSQL():
-
-
-	def _preSQL(self):
-
-
-	def getmarcforid(id):
+	def LoadItemIDs(self):
+		# query the db for a list of all item ids to extract
+		self.itemids = self.db.execute('select itemid from ...')
 		pass
 
+	def WriteMarcRecords(self, filename):
+		for id in self.itemids:
+			builder = MarcRecordBuilder(id, self.instructions, self.db)
+			rec = build.GetMarcRecord()
+			out = codecs.open(filename, 'w' 'utf-8')
+			out.write(rec.as_marc())  # this should probably be unicode. how??
 
 
+if __name__ == '__main__':
+	print('Running Access To Marc')
 
-class MarcFieldBase(object):
+	# csv file, dbconnstring and output filename should all be command line options
+	connstring = "Driver={Microsoft Access Driver (*.mdb, *.accdb)};Dbq=%s;Uid=%s;Pwd=%s" % ('Library2forCM.mdb', 'developer', 'r0ss')
+	print(connstring)
+	processor = Processor('data_map.csv', connstring)
 
-	def __init__(self, tag):
-		self.tag = tag
-		self.value = ''
-		self.defaultvalue = ''
-		self.select = ''
-		self.from = ''
-		self.where = ''
-		self.end = ''
-
-
-	def getSQL(self):
-		return 'SELECT %s FROM %s WHERE %s %s' % (
-				self.select,
-				self.from,
-				self.where,
-				self.end
-				)
-
-	def runSQL
-
-
-
-class MarcFixedField(MarcFieldBase):
-
-	def __init__(self, tag, position):
-		MarcFieldBase.__init__(self, tag)
-		self.position = position
-		pass
-
-
-
-class MarcSubField(MarcFieldBase):
-
-	def __init__(self, tag, position):
-		MarcFieldBase.__init__(self, tag)
-		self.position = position
+	processor.LoadItemIDs()
+	#processor.WriteMarcRecords('output.marc')
