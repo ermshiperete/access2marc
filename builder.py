@@ -2,27 +2,55 @@ import csv
 import pyodbc
 import pymarc
 
+"Exceptions for the MarcBuilder classes"
+class BuilderException(Exception):
+	pass
+
+class IndicatorInvalid(BuilderException):
+	def __init__(self, m):
+		self.message = m
+	def __str__(self):
+		return "Indicator data error: %s" % self.message
+
+
+
 class MarcRecordBuilder(object):
 	def __init__(self, itemID, instructions, queryObject):
 		self.ItemID = itemID
 		self.qo = queryObject
 		self.Fields = list()
-		self.instructions = instructions
+		self.Instructions = instructions
 		self._build()
 
 	def _build(self):
 		# parse the instruction csv and divide it up into field instructions
 		# a field instruction may contain multiple lines.  Fixed fields have one line per data element (which may span multiple chars) and Regular fields will have one line per subfield
 
+
+		def appendField(tag, inst):
+			if (int) tag < 10: # fixed field
+				self.Fields.append(
+						MarcFixedFieldBuilder(self.itemID, inst, self.qo))
+			else: # regular field
+				self.Fields.append(
+						MarcFieldBuilder(self.itemID, inst, self.qo))
+
+
+
 		# populate the field builder list by chopping up the instructions
-		while (self.Instructions ...):
-			# if its a fixed field
-			self.Fields.append(MarcFixedFieldBuilder(self.itemID, instructions, qo))
+		currTag = ''
+		currInstructions = []
+		for row in self.Instructions:
+			if currTag != row['Tag']: # process previous instruction group
+				if len(currInstructions) > 0:
+					appendField(currTag, currInstructions)
 
-			# if its a normal field
-			self.Fields.append(MarcFieldBuilder(self.itemID, instructions, qo))
+				# reset variables
+				currTag = row['Tag']
+				currInstructions = []
 
-		pass
+			currInstructions.append(row)
+		appendField(currTag, currInstructions)
 
 
 	def GetMarcRecord(self):
@@ -31,6 +59,17 @@ class MarcRecordBuilder(object):
 			rec.add_field(fieldbuilder.GetMarcField())
 		return rec
 
+
+
+class SQLQuery(object):
+	def __init__(self, qo, id, line):
+		self.qo = qo
+		self.id = id
+		self.map = line
+
+
+	def FetchOne(self):
+		sqlselect = "SELECT %s as data" % self.map['SQLSelect']
 
 
 
@@ -47,25 +86,51 @@ class MarcFixedFieldBuilder(object):
 
 	def _build(self):
 
+		def splitData(positions, data):
+			datamap = []
+			if positions.find('-') != -1:
+				# multiple positions
+				startpos = (int)positions[0:positions.index('-')]
+				endpos = (int)positions[positions.index('-')+1:]
+				if len(data) > endpos - startpos + 1:
+					raise IndicatorInvalid(
+							"expect size 1, was size %d" % len(data))
+				ctr = 0
+				for x in range(startpos, endpos + 1):
+					datamap.append((x, data[ctr]))
+					ctr += 1
+			else:
+				# single position
+				if len(data) > 1:
+					raise IndicatorInvalid(
+							"expect size 1, was size %d" % len(data))
+				datamap.append((positions, data))
+
+			return datamap
+
+
 		# get tag from first line
 		self.Tag = self.Instructions[0]['Tag']
 
 		for line in self.Instructions:
-			(positions, data) = self._doQuery(line)
-
 			# split data into characters
-			for position, char in self._splitData(positions, data):
+			for position, char in splitData(self._doQuery(line)):
 				self.DataChar[position] = char
 
 
 	def _doQuery(self, line):
-		# return positions and associated data
-		pass
+		data = ''
+		if line['SQLSelect']:
 
+			q = new SQLQuery(self.qo, self.ItemID, line)
+			row = q.FetchOne()
+			data = row['Data'].strip()
+		else:
+			data = line['DefaultValue'].strip()
 
-	def _splitData(self, positions, data):
-		# return position and character
-		pass
+		# return position range and data
+		return (line['FFPosition'], data)
+
 
 
 	def GetMarcField(self):
@@ -87,10 +152,6 @@ class MarcFixedFieldBuilder(object):
 				}[self.Tag](data)
 
 		return pymarc.Field(self.Tag, data)
-
-
-
-
 
 
 
@@ -150,71 +211,3 @@ class MarcFieldBuilder(object):
 		return pymarc.Field(self.Tag, self.Indicators, self.SubFields)
 
 
-
-
-
-
-
-
-
-
-
-class Processor(object):
-
-	def __init__(self, xlsfile, dbalias):
-		self.map = csv.DictReader(xslfile)
-		self.conn = pyodbc.connect('DSN=%s')
-		self.db = self.conn.cursor()
-
-		# load SQL statements into a dictionary
-
-		_prepSQL():
-
-
-	def _preSQL(self):
-
-
-	def getmarcforid(id):
-		pass
-
-
-
-
-class MarcFieldBase(object):
-
-	def __init__(self, tag):
-		self.tag = tag
-		self.value = ''
-		self.defaultvalue = ''
-		self.select = ''
-		self.from = ''
-		self.where = ''
-		self.end = ''
-
-
-	def getSQL(self):
-		return 'SELECT %s FROM %s WHERE %s %s' % (
-				self.select,
-				self.from,
-				self.where,
-				self.end
-				)
-
-	def runSQL
-
-
-
-class MarcFixedField(MarcFieldBase):
-
-	def __init__(self, tag, position):
-		MarcFieldBase.__init__(self, tag)
-		self.position = position
-		pass
-
-
-
-class MarcSubField(MarcFieldBase):
-
-	def __init__(self, tag, position):
-		MarcFieldBase.__init__(self, tag)
-		self.position = position
