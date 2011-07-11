@@ -1,6 +1,8 @@
 import csv
 import pyodbc
 import codecs
+from builder import MarcRecordBuilder
+
 class Processor(object):
 
 	def __init__(self, csvfile, dbconnstring):
@@ -32,4 +34,4 @@ if __name__ == '__main__':
 	processor = Processor('data_map.csv', connstring)
 
 	processor.LoadItemIDs()
-	#processor.WriteMarcRecords('output.marc')
+	processor.WriteMarcRecords('output.marc')
