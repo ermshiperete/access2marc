@@ -1,6 +1,8 @@
+import sys
 import csv
 import pyodbc
 import pymarc
+from logger import Logger
 
 "Exceptions for the MarcBuilder classes"
 class BuilderException(Exception):
@@ -14,12 +16,14 @@ class IndicatorInvalid(BuilderException):
 
 
 
-class MarcRecordBuilder(object):
+class MarcRecordBuilder(Logger):
 	def __init__(self, itemID, instructions, queryObject):
+		Logger.__init__(self, sys.stdout, True, 'RecBuild')
 		self.ItemID = itemID
 		self.qo = queryObject
 		self.Fields = list()
 		self.Instructions = instructions
+		self.Debug("building record %s" % itemID)
 		self._build()
 
 	def _build(self):
@@ -65,8 +69,9 @@ class MarcRecordBuilder(object):
 
 
 
-class SQLQuery(object):
+class SQLQuery(Logger):
 	def __init__(self, qo, id, line):
+		Logger.__init__(self, sys.stdout, True, 'Query')
 		self.qo = qo
 		self.id = id
 		self.map = line
@@ -74,41 +79,52 @@ class SQLQuery(object):
 
 	def FetchData(self):
 		qselect = "SELECT %s as data" % self.map['SQLSelect']
-		qfrom = "FROM %s" % self.map['SQLFrom']
-		qwhere = "WHERE (%s) AND Item.ItemID = %s" % (
-				self.map['SQLWhere'],
-				self.id)
-		qend = self.map['SQLEnd']
-		sql = "%s %s %s %s" % (qselect, qfrom, qwhere, qend)
-		self.qo.execute(sql)
-		row = self.qo.fetchone()
-		return row['Data'].strip()
+		return self._fetch(qselect)
 
 
 	def FetchIndicator(self, indicator):
 		key = "I%d_SQLSelect" % indicator
 		if self.map[key] == "":
-			return {"data":" "}
-		qselect = "SELECT %s as indicator" % self.map[key]
+			return " "
+		qselect = "SELECT %s as data" % self.map[key]
+		return self._fetch(qselect)
+
+
+	def _fetch(self, qselect):
 		qfrom = "FROM %s" % self.map['SQLFrom']
-		qwhere = "WHERE (%s) AND Item.ItemID = %s" % (
-				self.map['SQLWhere'],
-				self.id)
+		witemid = "Item.ItemID = %s" % self.id
+		if self.map['SQLWhere'].strip():
+			qwhere = "WHERE (%s) AND %s" % (self.map['SQLWhere'], witemid)
+		else:
+			qwhere = "WHERE %s" % witemid
 		qend = self.map['SQLEnd']
 		sql = "%s %s %s %s" % (qselect, qfrom, qwhere, qend)
-		self.qo.execute(sql)
-		row = self.qo.fetchone()
-		return row['indicator'].strip()
+		self.Debug(sql)
+		try:
+			self.qo.execute(sql)
+			row = self.qo.fetchone()
+		except pyodbc.Error as e:
+			self.Log("AccessDB Error: %s" % e[1])
+			row = ""
+
+		if row and 0 in row:
+			return str(row[0]).strip()
+		else:
+			return ""
 
 
 
 
-class MarcFixedFieldBuilder(object):
+class MarcFixedFieldBuilder(Logger):
 
 	def __init__(self, itemID, instructions, queryObject):
+		Logger.__init__(self, sys.stdout, True, 'FFieldBuild')
 		self.ItemID = itemID
 		self.DataChar = dict()
-		self.Tag = ''
+
+		# get tag from first line
+		self.Tag = instructions[0]['Tag']
+
 		self.qo = queryObject
 		self.Instructions = instructions
 		self._build()
@@ -122,32 +138,38 @@ class MarcFixedFieldBuilder(object):
 				# multiple positions
 				startpos = int(positions[0:positions.index('-')])
 				endpos = int(positions[positions.index('-')+1:])
-				if len(data) > endpos - startpos + 1:
-					raise IndicatorInvalid(
-							"expect size 1, was size %d" % len(data))
+				expectedlen = endpos - startpos + 1
+				if len(data) != expectedlen:
+					self.Log("Indicator Length Error: expected %d, was %d" % (
+						expectedlen, len(data)))
+
 				ctr = 0
 				for x in range(startpos, endpos + 1):
-					datamap.append((x, data[ctr]))
+					if data:
+						datamap.append((x, data[ctr]))
+					else:
+						datamap.append((x, " "))
 					ctr += 1
 			else:
 				# single position
-				if len(data) > 1:
-					raise IndicatorInvalid(
-							"expect size 1, was size %d" % len(data))
+				if len(data) != 1:
+					self.Log("Indicator Length Error: expected 1, was %d" % (
+							len(data)))
 				datamap.append((positions, data))
-
 			return datamap
 
 
-		# get tag from first line
-		self.Tag = self.Instructions[0]['Tag']
-
 		for line in self.Instructions:
+			self.Debug("building fixed field %s (%s)" % (self.Tag,
+				line['FFPosition']))
 			positions, data = self._doQuery(line)
+			self.Debug("positions = %s , data = %s" % (positions, data))
 
 			# split data into characters
 			for position, char in splitData(positions, data):
 				self.DataChar[position] = char
+
+			self.Debug(str(self.DataChar))
 
 
 	def _doQuery(self, line):
@@ -167,7 +189,7 @@ class MarcFixedFieldBuilder(object):
 	def GetMarcField(self):
 		data = ''
 		for i in range(0, 100):
-			if i in self.DataChars:
+			if i in self.DataChar:
 				data += self.DataChar[i]
 			else:
 				data += ' '
@@ -186,39 +208,39 @@ class MarcFixedFieldBuilder(object):
 
 
 
-class MarcFieldBuilder(object):
+class MarcFieldBuilder(Logger):
 	def __init__(self, itemID, instructions, queryObject):
+		Logger.__init__(self, sys.stdout, True, 'SFieldBuild')
 		self.ItemID = itemID
 		self.SubFields = list() # eg. ['a', 'the title', 'c', 'the author']
 		self.Indicators = list() # eg. ['0', '1']
-		self.Tag = ''
+
+		# get tag from first line
+		self.Tag = instructions[0]['Tag']
+
 		self.qo = queryObject
 		self.Instructions = instructions
 		self._build()
 
 
 	def _build(self):
-		# get tag from first line
-		# this could be done in the constructor
-		self.Tag = self.Instructions[0]['Tag']
 
 		for line in self.Instructions:
+			self.Debug("building field %s (subfield %s)" % (self.Tag,
+				line['Subfield']))
 
 			# basically just do this for the first line
 			if (len(self.Indicators) == 0):
-				self.Indicators.append(self._doI1Query(line))
-				self.Indicators.append(self._doI2Query(line))
+				self.Indicators.append(self._doIndicatorQuery(line, 1))
+				self.Indicators.append(self._doIndicatorQuery(line, 2))
 
 			self.SubFields.extend(self._doSubfieldQuery(line))
+			self.Debug(self.SubFields)
 
-
-			# split data into characters
-			for position, char in self._splitData(positions, data):
-				self.DataChar[position] = char
 
 
 	def _doIndicatorQuery(self, line, indicator):
-		key = "I%d_SQLQuery" % indicator
+		key = "I%d_SQLSelect" % indicator
 		query = line[key]
 		if query:
 
@@ -235,7 +257,27 @@ class MarcFieldBuilder(object):
 
 
 
-	def _doSubFieldQuery(self, line):
+	def _doSubfieldQuery(self, line):
+		def _splitData(data):
+			# state machine
+			state = 'DATA'
+			result = ()
+			data = ""
+			for c in data:
+				if state == 'FIELD':
+					result.append(c)
+					state = 'DATA'
+
+				elif state == 'DATA':
+					if c == '$' or c == '|':
+						if data:
+							result.append(data)
+							data = ""
+						state = 'FIELD'
+						continue
+					data += c
+			return result
+
 		# if there is a default value, use that
 		if line['SQLSelect']:
 			q = SQLQuery(self.qo, self.ItemID, line)
@@ -260,29 +302,6 @@ class MarcFieldBuilder(object):
 
 		else:
 			return [ line['Subfield'].strip(), line['DefaultValue'].strip() ]
-
-
-	def _splitData(self, data):
-		# state machine
-		state = 'DATA'
-		result = ()
-		data = ""
-
-		for c in data:
-			if state == 'FIELD':
-				result.append(c)
-				state = 'DATA'
-
-			elif state == 'DATA':
-				if c == '$' or c == '|':
-					if data:
-						result.append(data)
-						data = ""
-					state = 'FIELD'
-					continue
-				data += c
-
-		return result
 
 
 	def GetMarcField(self):

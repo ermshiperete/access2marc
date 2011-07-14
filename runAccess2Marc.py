@@ -1,3 +1,1 @@
-from access2marc import Processor
-
-processor = Processor('
+# placeholder for __main__ script if/when this gets moved to a module

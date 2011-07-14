@@ -21,8 +21,8 @@ class Processor(object):
 	def WriteMarcRecords(self, filename):
 		for id in self.itemids:
 			builder = MarcRecordBuilder(id, self.instructions, self.db)
-			rec = build.GetMarcRecord()
-			out = codecs.open(filename, 'w' 'utf-8')
+			rec = builder.GetMarcRecord()
+			out = codecs.open(filename, 'w', 'utf-8')
 			out.write(rec.as_marc())  # this should probably be unicode. how??
 
 
