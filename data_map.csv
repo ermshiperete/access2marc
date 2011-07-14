@@ -2,77 +2,77 @@
 ,,,,,,,,,,,"Leader",,"Yes","No"
 ,,,,,,,,,,,,,,
 "000","05",,,,"n",,,,,,"Record status. Use ""n"" (new) as all records in Access has no creation date.","Nil",,"No"
-"000","06",,,,,"ItemType.ItemTypeCode","ItemType","ItemType.ItemTypeID = Item.ItemTypeID",,,"Type of record","Item-->ItemTypeID, need to get the real value from ItemType table. Value need conversion, see ItemType worksheet
+"000","06",,,,,"ItemType.ItemTypeCode","ItemType INNER JOIN Item ON ItemType.ItemTypeID = Item.ItemTypeID",,,,"Type of record","Item-->ItemTypeID, need to get the real value from ItemType table. Value need conversion, see ItemType worksheet
 ",,"No"
-"000","07",,,,,"BiblioLevel.BiblioLevelCode","BiblioLevel","BiblioLevel.BiblioLevelID = Item.BiblioLevelID",,,"Bibliographic level","Item-->BiblioLevelID, need to get the real value from BiblioLevel table.
+"000","07",,,,,"BiblioLevel.BiblioLevelCode","BiblioLevel INNER JOIN Item ON BiblioLevel.BiblioLevelID = Item.BiblioLevelID","BiblioLevel.BiblioLevelID = Item.BiblioLevelID",,,"Bibliographic level","Item-->BiblioLevelID, need to get the real value from BiblioLevel table.
 ",,"No"
-"000","09",,,,"a",,,,,,"Character coding scheme. Use â€œaâ€ (Unicode)","Nil",,"No"
+"000","09",,,,"a",,,,,,"Character coding scheme. Use “a” (Unicode)","Nil",,"No"
 "000","17",,,,,,,,,,"Encoding level. Blank this field","Nil",,"No"
-"000","18",,,,"a",,,,,,"Descriptive cataloging form. Use â€œaâ€ (AACR2)","Nil",,"No"
-"008","00-05",,,,,"CONVERT(VARCHAR(6),Item.LastUpdate,112)",,,,,"Date entered on file (yymmdd)","Item-->LastUpdate. This is the only date info available in MSAccess db.
+"000","18",,,,"a",,,,,,"Descriptive cataloging form. Use “a” (AACR2)","Nil",,"No"
+"008","00-05",,,,,"Format(Item.LastUpdate,'yymmdd')","Item",,,,"Date entered on file (yymmdd)","Item-->LastUpdate. This is the only date info available in MSAccess db.
 ",,"No"
-"008","06",,,,,"DateType.DateTypeID","DateType","DateType.DateTypeID = Item.DateTypeID",,,"Type of date","Item-->DateTypeID, need to get the real value from DateType table. Value is compatible with MARC standard
+"008","06",,,,,"DateType.DateTypeID","DateType INNER JOIN Item ON DateType.DateTypeID = Item.DateTypeID",,,,"Type of date","Item-->DateTypeID, need to get the real value from DateType table. Value is compatible with MARC standard
 ",,"No"
 "008","07-10",,,,,"IIf(Left([Item]![Date1],1)=""c"",IIf(Left([Item]![Date1],2)=""c["",Mid([Item]![Date1],3,4),Mid([Item]![Date1],2,4)),IIf(Left([Item]![Date1],1)=""["",Mid([Item]![Date1],2,4),Left([Item]![Date1],4)))","Item",,,"ExtractYear($col1)","Date 1","Item-->Date1",,"No"
 "008","11-14",,,,,"IIf(Left([Item]![Date2],1)=""c"",IIf(Left([Item]![Date2],2)=""c["",Mid([Item]![Date2],3,4),Mid([Item]![Date2],2,4)),IIf(Left([Item]![Date2],1)=""["",Mid([Item]![Date2],2,4),Left([Item]![Date2],4)))","Item",,,,"Date 2","Item-->Date2",,"No"
 "008","15-17",,,,,"Item.PubCountryCode","Item",,,,"Place of publication, production or execution","Item-->PubCountryCode",,"No"
 "008","18",,,,,"IIf(InStr(1,[Item]![IllustrativeMatter],""ill"")>0,""a"",IIf(InStr(1,[Item]![IllustrativeMatter],""map"")>0,""b""))","Item",,,,"Illustrations","Mark the appropriate value with the value  from Item-->IllustrativeMatter.
-â€œaâ€ illustrations
-â€œbâ€ maps
+“a” illustrations
+“b” maps
 ",,"No"
 ,"19",,,,,"IIf(InStr(1,[Item]![IllustrativeMatter],""map"")>0,""b"")","Item",,,,,,,
-,"20-21",,,,"[blank]",,,,,,,,,
-"008","18",,,,"[blank]",,,,,,"Frequency (For Serial)","Item-->FrequencyID. However there is no data in this field.",,
-"008","22",,,,"[blank]",,,,,,"Target audience. Blank this field","Nil",,"No"
-"008","23",,,,,"MediaType.MediaTypeCode","MediaType","MediaType.MediaTypeID = Item.MediaTypeID",,,"Form of item","Item-->MediaTypeID, need to get the real value from MediaType table. Value need conversion, see MediaType worksheet
+,"20-21",,,,,,,,,,,,,
+"008","18",,,,,,,,,,"Frequency (For Serial)","Item-->FrequencyID. However there is no data in this field.",,
+"008","22",,,,,,,,,,"Target audience. Blank this field","Nil",,"No"
+"008","23",,,,,"MediaType.MediaTypeCode","MediaType INNER JOIN Item ON MediaType.MediaTypeID = Item.MediaTypeID",,,,"Form of item","Item-->MediaTypeID, need to get the real value from MediaType table. Value need conversion, see MediaType worksheet
 ",,"No"
-"008","24-27",,,,"[blank]",,,,,,"Nature of contents","Mark the appropriate value from with the value from 245 (Title)
-â€œbâ€ bibliographies
-â€œdâ€ dictionaries, glossaries, gazetteers
-â€œeâ€ encyclopedias
-â€œmâ€ theses, see 502
-â€œsâ€ statics
+"008","24-27",,,,,,,,,,"Nature of contents","Mark the appropriate value from with the value from 245 (Title)
+“b” bibliographies
+“d” dictionaries, glossaries, gazetteers
+“e” encyclopedias
+“m” theses, see 502
+“s” statics
 **Empty as it is hard to determine the field.
 ",,"No"
-"008","28",,,,"[blank]",,,,,,"Government publication. Put â€œ#â€ as we have no government.","Nil",,"No"
-"008","29",,,,"[blank]",,,,,,"Conference publication. Blank this field","Nil",,"No"
-"008","30",,,,"[blank]",,,,,,"Festschrift. Blank this field","Nil",,"No"
-"008","31",,,,,"IIf(InStr(1,[Note]![NoteText],""index"")>0,""1"",""0"")","Item","Item.ItemID = Note.ItemID",,,"Index","Mark the appropriate value with the value  from 5xx
+"008","28",,,,,,,,,,"Government publication. Put “#” as we have no government.","Nil",,"No"
+"008","29",,,,,,,,,,"Conference publication. Blank this field","Nil",,"No"
+"008","30",,,,,,,,,,"Festschrift. Blank this field","Nil",,"No"
+"008","31",,,,,"IIf(InStr(1,[Note]![NoteText],""index"")>0,""1"",""0"")","Note INNER JOIN Item ON Item.ItemID = Note.ItemID",,,,"Index","Mark the appropriate value with the value  from 5xx
 ""0"" if no index present
 ""1"" index present
 Need to check with 5xx when doing the data conversion
 ",,"No"
-"008","32",,,,"[blank]",,,,,,"Undefined (Blank)","Nil",,"No"
+"008","32",,,,,,,,,,"Undefined (Blank)","Nil",,"No"
 "008","33",,,,"0",,,,,,"Literary form. Put ""0"" (Not fiction)","Nil",,"No"
 "008","34",,,,"0",,,,,,"Biography. Put ""0"" (not biographical material) first as the MS Access database has no designated field
 ","Nil",,"No"
-"008","35-37",,,,"[blank]",,,,,,"Language code","The nearest field is ItemLanguage. However we don't know which is the language of work and which indicate the language talks about in the work. Also it needs to take time to translate the value from our code to MARC language code
+"008","35-37",,,,,,,,,,"Language code","The nearest field is ItemLanguage. However we don't know which is the language of work and which indicate the language talks about in the work. Also it needs to take time to translate the value from our code to MARC language code
 ",,"No"
-"008","38",,,,"[blank]",,,,,,"Modified record. Blank for this field (record not modified)
+"008","38",,,,,,,,,,"Modified record. Blank for this field (record not modified)
 ","Nil",,"No"
-"008","39",,,,"d",,,,,,"Cataloging source. Use â€œdâ€ (not one of the above)
+"008","39",,,,"d",,,,,,"Cataloging source. Use “d” (not one of the above)
 ","Nil",,"No"
-"020",,"[blank]","[blank]","$a",,"[ISBN]![ISBNNumber] & "" "" & [ISBN]![ISBNComment]","Item INNER JOIN ISBN","Item.ItemID = ISBN.ItemID",,,"ISBN
+"020",,,,"$a",,"[ISBN]![ISBNNumber] & "" "" & [ISBN]![ISBNComment]","ISBN INNER JOIN Item ON Item.ItemID = ISBN.ItemID",,,,"ISBN
 1st ind. Blank
 2nd ind. Blank
 $a ISBN (NR)
 ","ItemISBN-->ISBN. Could have more than 1 ISBN",,"Yes"
-"022",,"[blank]","[blank]","$a",,"Item.ISSN","Item",,,,"ISSN
+"022",,,,"$a",,"Item.ISSN","Item",,,,"ISSN
 Indicators Blank
 $a Valid ISSN (NR)","Item-->ISSN=$a
 Cataloger use this also for monograph with series ISSN. Should check data before migration","No","Yes"
-"040",,"[blank]","[blank]","$a","DTL",,,,,,"Cataloging source
+"040",,,,"$a","DTL",,,,,,"Cataloging source
 1st ind. Blank
 2nd ind. Blank
 $a Original cataloging agency (NR). Put ""DTL""
 ","Nil","Yes","No"
-"082",,"0","4","$a",,"ClassNumber.ClassNumberText","Item INNER JOIN (ClassNumber INNER JOIN Holding ON ClassNumber.ClassNumberID = Holding.ClassNumberID)","Item.ItemID = Holding.ItemID",,,"Dewey Decimal classification number
+"082",,"0","4","$a",,"ClassNumber.ClassNumberText","Item INNER JOIN (Holding INNER JOIN ClassNumber ON ClassNumber.ClassNumberID = Holding.ClassNumberID) ON Item.ItemID = Holding.ItemID",,,,"Dewey Decimal classification number
 1st ind. Put ""0"" (Full edition)
 2nd ind. =4 (Assigned by agency other than LC)
-$a Classification number Â®
+$a Classification number ®
 ","Holding-->ClassNumberID. Need to get the real value from ClassNumber table","Yes","Yes
 (Unique in Access DB)"
-"100",,"Name.FormofEntry","[blank]","All subfield in a string",,"""$a"" & IIf([Name]![FormofEntry]=0,Trim([Name]![FirstName] & "" "" & [Name]![LastName]) & IIf(Right([Name]![FirstName] & [Name]![LastName],1)<>""."","".""),Trim([Name]![LastName]) & IIf([Name]![FirstName] Is Not Null,"", "" & Trim([Name]![FirstName])) & IIf(Right([Name]![LastName] & [Name]![FirstName],1)<>""."",""."")) & IIf([Name]![FullerName]<>"""",""$q("" & Trim([Name]![FullerName]) & "")"") & IIf([Name]![YearOfBirth]<>"""","",$d"" & Trim([Name]![YearOfBirth]))","Name INNER JOIN (Item INNER JOIN ItemName ON Item.ItemID = ItemName.ItemID) ON Name.NameID = ItemName.NameID","(((ItemName.NameSequence)=1) AND ((Name.NameTypeID)=2) AND ((ItemName.FunctionID)=2))",,,"Personal name main entry
+"100",,"Name.FormofEntry",,"inline",,"""$a"" & IIf([Name]![FormofEntry]=0,Trim([Name]![FirstName] & "" "" & [Name]![LastName]) & IIf(Right([Name]![FirstName] & [Name]![LastName],1)<>""."","".""),Trim([Name]![LastName]) & IIf([Name]![FirstName] Is Not Null,"", "" & Trim([Name]![FirstName])) & IIf(Right([Name]![LastName] & [Name]![FirstName],1)<>""."",""."")) & IIf([Name]![FullerName]<>"""",""$q("" & Trim([Name]![FullerName]) & "")"") & IIf([Name]![YearOfBirth]<>"""","",$d"" & Trim([Name]![YearOfBirth]))","Name INNER JOIN (Item INNER JOIN ItemName ON Item.ItemID = ItemName.ItemID) ON Name.NameID = ItemName.NameID","ItemName.NameSequence = 1 AND Name.NameTypeID = 2 AND ItemName.FunctionID = 2",,,"Personal name main entry
 1st ind. Type of personal name entry element. 0=Forename, 1=Surname, 3=Family name
 2nd ind. Blank
 $a Personal name (NR)
@@ -85,13 +85,13 @@ ItemName-->Name-->LastName + "","" + FirstName = $a
 ItemName-->Name-->NamePrefix=$c
 ItemName-->Name-->YearOfBirth=$d
 ","No","No"
-"110",,"2","[blank]","All subfield in a string",,"""$a"" & [Name]![LastName] & IIf([Name]![FirstName]<>"""","" "" & [Name]![FirstName]) & IIf(Right([Name]![LastName] & [Name]![FirstName],1)<>""."",""."")","Name INNER JOIN (Item INNER JOIN ItemName ON Item.ItemID = ItemName.ItemID) ON Name.NameID = ItemName.NameID","(((ItemName.NameSequence)=1) AND ((Name.NameTypeID)=3) AND ((ItemName.FunctionID)=2)) OR (((ItemName.NameSequence)=1) AND ((Name.NameTypeID)=3) AND ((ItemName.FunctionID)=3))",,,"Corporate name main entry
+"110",,"2",,"inline",,"""$a"" & [Name]![LastName] & IIf([Name]![FirstName]<>"""","" "" & [Name]![FirstName]) & IIf(Right([Name]![LastName] & [Name]![FirstName],1)<>""."",""."")","Name INNER JOIN (Item INNER JOIN ItemName ON Item.ItemID = ItemName.ItemID) ON Name.NameID = ItemName.NameID","(((ItemName.NameSequence)=1) AND ((Name.NameTypeID)=3) AND ((ItemName.FunctionID)=2)) OR (((ItemName.NameSequence)=1) AND ((Name.NameTypeID)=3) AND ((ItemName.FunctionID)=3))",,,"Corporate name main entry
 1st ind. Put ""2"" (Name in direct order)
 2nd ind. Type of added entry, blank for no information provided
 $a Corporate name or jurisdiction name as entry element (NR)
 .$b Each subordinate unit in a hierarchy (R)
 ","ItemName-->Name where NameTypeID=3. Name data needs re-arrangement.","No","No"
-"111",,"2","[blank]","All subfield in a string",,"""$a"" & Trim([Name]![LastName]) & IIf([Name]![NamePrefix]<>"""",""$c"" & Trim([Name]![NamePrefix])) & IIf(Right(Trim([Name]![LastName]) & IIf([Name]![NamePrefix]<>"""",""$c"" & Trim([Name]![NamePrefix])),1)<>""."",""."")","Name INNER JOIN (Item INNER JOIN ItemName ON Item.ItemID = ItemName.ItemID) ON Name.NameID = ItemName.NameID","(((Name.LastName) Is Not Null) AND ((Name.NameTypeID)=4) AND ((ItemName.NameSequence)=1) AND ((ItemName.FunctionID)=2)) OR (((Name.NameTypeID)=4) AND ((ItemName.NameSequence)=1) AND ((ItemName.FunctionID)=12))",,,"Meeting name main entry
+"111",,"2",,"inline",,"""$a"" & Trim([Name]![LastName]) & IIf([Name]![NamePrefix]<>"""",""$c"" & Trim([Name]![NamePrefix])) & IIf(Right(Trim([Name]![LastName]) & IIf([Name]![NamePrefix]<>"""",""$c"" & Trim([Name]![NamePrefix])),1)<>""."",""."")","Name INNER JOIN (Item INNER JOIN ItemName ON Item.ItemID = ItemName.ItemID) ON Name.NameID = ItemName.NameID","(((Name.LastName) Is Not Null) AND ((Name.NameTypeID)=4) AND ((ItemName.NameSequence)=1) AND ((ItemName.FunctionID)=2)) OR (((Name.NameTypeID)=4) AND ((ItemName.NameSequence)=1) AND ((ItemName.FunctionID)=12))",,,"Meeting name main entry
 1st ind. Put ""2"" (Name in direct order)
 2nd ind. Type of added entry, blank for no information provided
 $a Meeting name or jurisdiction name as entry element (NR)
@@ -101,7 +101,7 @@ $c Location of meeting -- when given outside parentheses (NR)
 $d Date of meeting -- when given outside parentheses (R)
 #:$d Date of meeting -- when given inside parentheses (R)
 .$e Subordinate unit entered under a meeting name (R)","ItemName-->Name where NameTypeID=4. Name data needs re-arrangement.","No","No"
-"130",,"0","[blank]","$a",," [Title]![TitleText] & "" "" & Replace([Title]![MARCother],""^"",""$"")","Item INNER JOIN Title ON Item.ItemID = Title.ItemID","(Title.TitleTypeID)=12",,,"Uniform main title entry
+"130",,"0",,"$a",," [Title]![TitleText] & "" "" & Replace([Title]![MARCother],""^"",""$"")","Item INNER JOIN Title ON Item.ItemID = Title.ItemID","(Title.TitleTypeID)=12",,,"Uniform main title entry
 1st ind. Nonfiling characters
 2nd ind. Blank
 $a Uniform title (NR)
@@ -114,10 +114,10 @@ Title-->TitleOffset = 1st ind.
 Title-->TitleText = $a
 Title-->MARCother append to the end of $a, needs conversion of some control characters","No","No"
 "240",,"1","0","$a",," [Title]![TitleText] & "" "" & Replace([Title]![MARCother],""^"",""$"")","Item INNER JOIN Title ON Item.ItemID = Title.ItemID","(Title.TitleTypeID)=16",,,"Uniform title
-1st ind. Put â€œ1â€ (Display specifications)
+1st ind. Put “1” (Display specifications)
 2nd ind. Nonfiling characters
 $a Uniform title (NR)
-$p Name of part/section of a work Â®
+$p Name of part/section of a work ®
 $l language of work (NR)
 $f Date of work (NR)
 $s Version - or edition of a work (NR)
@@ -137,8 +137,8 @@ Title-->TitleOffset = 2nd ind.
 Title-->TitleText = $a
 End with period ""."" before the field $y
 Title-->Title_Language = $y","No","Yes"
-"245",,"0","Item.TitleOffset","All subfield in a string",,"""$a"" & IIf(InStr([Item]![MainTitle],"":"")>0,Trim(Mid([Item]![MainTitle],1,InStr([Item]![MainTitle],"":"")-1)),[Item]![MainTitle]) & IIf(InStr([Item]![MainTitle],"":"")>0,"" :$b"" & Trim(Mid([Item]![MainTitle],InStr([Item]![MainTitle],"":"")+1,1000))) & IIf([Item]![StatementofResp]<>"""","" /$c"" & Trim([Item]![StatementofResp])) & "".""","Item",,,,"Title statement
-1st ind. Put â€œ0â€ (Do not index as a title added entry)
+"245",,"0","Item.TitleOffset","inline",,"""$a"" & IIf(InStr([Item]![MainTitle],"":"")>0,Trim(Mid([Item]![MainTitle],1,InStr([Item]![MainTitle],"":"")-1)),[Item]![MainTitle]) & IIf(InStr([Item]![MainTitle],"":"")>0,"" :$b"" & Trim(Mid([Item]![MainTitle],InStr([Item]![MainTitle],"":"")+1,1000))) & IIf([Item]![StatementofResp]<>"""","" /$c"" & Trim([Item]![StatementofResp])) & "".""","Item",,,,"Title statement
+1st ind. Put “0” (Do not index as a title added entry)
 2nd Nonfiling characters
 $a Title proper (NR)
 $n Number of part or section(R), or
@@ -152,21 +152,21 @@ Item-->StatementofResp = $c
 
 *Beware about the field length limit in Access DB.","Yes","No"
 "246",,"1","4","$a",,"Title.TitleText","Item INNER JOIN Title ON Item.ItemID = Title.ItemID","Title.TitleTypeID=3",,,"Varying form of title
-1st ind. Put â€œ1â€ (Display and index)
+1st ind. Put “1” (Display and index)
 2nd ind. There are 1-8 for different case. See the catalog manual
 2nd ind. = 4 (Cover title)
 $a Title proper (NR)
-$p Number of part or section Â®
+$p Number of part or section ®
 #:$b Remainder of title (NR)
 ","Cover title:
 Title-->TitleTypeID = 3
 Title-->TitleText = $a
 Usually inf from notes. Needs browse through the note field of the record.","No","Yes"
-"250",,"[blank]","[blank]","$a",,"IIf(Right([Item]![Edition],1)=""."",[Item]![Edition],[Item]![Edition] & ""."")","Item","(Item.Edition) Is Not Null",,,"Edition statement
+"250",,,,"$a",,"IIf(Right([Item]![Edition],1)=""."",[Item]![Edition],[Item]![Edition] & ""."")","Item","(Item.Edition) Is Not Null",,,"Edition statement
 No ind.
 $a Edition statement
 ","Item--> Edition","No","No"
-"260",,"[blank]","[blank]","All subfield in a string",,"IIf([PublisherPlace]![PublisherPlaceName]<>""???"",""$a"" & [PublisherPlace]![PublisherPlaceName]) & IIf([Publisher]![PublisherName]<>""???"","" $b"" & [Publisher]![PublisherName]) & IIf([Item]![Date1]<>"""","",$c"" & [Item]![Date1]) & IIf([Item]![date2]<>"""","", "" & [Item]![Date1])","PublisherPlace INNER JOIN (Publisher INNER JOIN (Item INNER JOIN ItemPublisher ON Item.ItemID = ItemPublisher.ItemID) ON Publisher.PublisherID = ItemPublisher.PublisherID) ON PublisherPlace.PublisherPlaceID = ItemPublisher.PublisherPlaceID",,,,"Publications, distribution, etc.
+"260",,,,"inline",,"IIf([PublisherPlace]![PublisherPlaceName]<>""???"",""$a"" & [PublisherPlace]![PublisherPlaceName]) & IIf([Publisher]![PublisherName]<>""???"","" $b"" & [Publisher]![PublisherName]) & IIf([Item]![Date1]<>"""","",$c"" & [Item]![Date1]) & IIf([Item]![date2]<>"""","", "" & [Item]![Date1])","PublisherPlace INNER JOIN (Publisher INNER JOIN (Item INNER JOIN ItemPublisher ON Item.ItemID = ItemPublisher.ItemID) ON Publisher.PublisherID = ItemPublisher.PublisherID) ON PublisherPlace.PublisherPlaceID = ItemPublisher.PublisherPlaceID",,,,"Publications, distribution, etc.
 1st ind. Blank for monograph; Blank for Serial for earliest available publisher
 2nd ind. Blank, undefined
 $a Place of publication, distribution, etc. (R)
@@ -178,7 +178,7 @@ ItemPublisher-->Publisher-->PublisherName=$b
 Item-->Date1=$c
 
 *Beware of the sequence of publisher in record","Yes for Serial","Yes for Serial"
-"300",,"[blank]","[blank]","All subfield in a string",,"IIf([Item]![Extent]<>"""",""$a"" & Trim([Item]![Extent])) & IIf([Item]![IllustrativeMatter]<>"""","":$b"" & Trim([Item]![IllustrativeMatter])) & IIf([Item]![OtherMaterial]<>"""",""+$e"" & Trim([Item]![OtherMaterial]))","Item",,,,"Physical description
+"300",,,,"inline",,"IIf([Item]![Extent]<>"""",""$a"" & Trim([Item]![Extent])) & IIf([Item]![IllustrativeMatter]<>"""","":$b"" & Trim([Item]![IllustrativeMatter])) & IIf([Item]![OtherMaterial]<>"""",""+$e"" & Trim([Item]![OtherMaterial]))","Item",,,,"Physical description
 Indicators: Blank
 $a Extent of item/Play time if appropriate (R)
 #:$b Other physical details (R)
@@ -187,7 +187,7 @@ $a Extent of item/Play time if appropriate (R)
 Item-->IllustrativeMatter=$b
 Item-->Size=$c
 Item-->OtherMaterial=$e","Yes","Yes"
-"440",,"[blank]","[blank]","All subfield in a string",,"IIf([Series]![SeriesText]<>"""",""$a"" & Trim([Series]![SeriesText]) & IIf([item]![SequentialDesignation]<>"""","" ;$v"" & Trim([Item]![SequentialDesignation])))","Series INNER JOIN (Item INNER JOIN ItemSeries ON Item.ItemID = ItemSeries.ItemID) ON Series.SeriesID = ItemSeries.SeriesID;",,,,"Series statement/Series added entry (Index)
+"440",,,,"inline",,"IIf([Series]![SeriesText]<>"""",""$a"" & Trim([Series]![SeriesText]) & IIf([item]![SequentialDesignation]<>"""","" ;$v"" & Trim([Item]![SequentialDesignation])))","Series INNER JOIN (Item INNER JOIN ItemSeries ON Item.ItemID = ItemSeries.ItemID) ON Series.SeriesID = ItemSeries.SeriesID",,,,"Series statement/Series added entry (Index)
 1st ind. Blank
 2nd ind. Non-filing characters
 $a Series title proper (NR)
@@ -198,7 +198,7 @@ Or ,$p Name of part or section of a series (R)
 ","Series-->SeriesText = $a
 Series-->ISSN = $x
 Item-->SequentialDesignation = $v","No","Yes"
-"500",,"[blank]","[blank]","$a",,"Note.NoteText","Item INNER JOIN [Note] ON Item.ItemID = Note.ItemID","Note.NumNote=500",,,"General note
+"500",,,,"$a",,"Note.NoteText","Item INNER JOIN Note ON Item.ItemID = Note.ItemID","Note.NumNote=500",,,"General note
 Field 500 may have number of content:
 a. Accompany material note
 b. Edition and history note
@@ -219,49 +219,49 @@ o. Variant title note
 Indicators  Blank
 $a General note
 ","Note-->NoteText where CommentType=500 = $a","No","Yes"
-"502",,"[blank]","[blank]","$a",,"Note.NoteText","Item INNER JOIN [Note] ON Item.ItemID = Note.ItemID","Note.NumNote)=502",,,"Dissertation note
+"502",,,,"$a",,"Note.NoteText","Item INNER JOIN [Note] ON Item.ItemID = Note.ItemID","Note.NumNote)=502",,,"Dissertation note
 Indicators  Blank
 $a Dissertation note (NR)
 ","Note-->NoteText where CommentType=502 = $a","No","Yes"
-"504",,"[blank]","[blank]","$a",,"Note.NoteText","Item INNER JOIN [Note] ON Item.ItemID = Note.ItemID","Note.NumNote)=504",,,"Bibliography note
+"504",,,,"$a",,"Note.NoteText","Item INNER JOIN [Note] ON Item.ItemID = Note.ItemID","Note.NumNote)=504",,,"Bibliography note
 Indicators  Blank
 $a Bibliography note (NR)
 ","Note-->NoteText where CommentType=504 = $a","No","Yes"
-"505",,"0","[blank]","$a",,"Note.NoteText","Item INNER JOIN [Note] ON Item.ItemID = Note.ItemID","Note.NumNote=505",,,"Formatted contents note
+"505",,"0",,"$a",,"Note.NoteText","Item INNER JOIN Note ON Item.ItemID = Note.ItemID","Note.NumNote=505",,,"Formatted contents note
 Contains titles of separate works found in a collection, or the table of content of the work
-1st ind. Display constant controller, put â€œ0â€ (content)
-2nd ind. Level of content designation, blank for â€œbasicâ€
+1st ind. Display constant controller, put “0” (content)
+2nd ind. Level of content designation, blank for “basic”
 $a Formatted contents (NR)
 ","Note-->NoteText where CommentType=505 = $a","No","Yes"
-"520",,"[blank]","[blank]","$a",,"Note.NoteText","Item INNER JOIN [Note] ON Item.ItemID = Note.ItemID","Note.NumNote=520",,,"Summary note
+"520",,,,"$a",,"Note.NoteText","Item INNER JOIN [Note] ON Item.ItemID = Note.ItemID","Note.NumNote=520",,,"Summary note
 1st ind.  Blank (no information provided [Summary])
 2nd ind. Blank
 $a Summary note (NR)
 ","Note-->NoteText where CommentType=520 = $a","No","Yes"
 "610",,"2","4","$a",,"Subject.SubjectTextfor6XX","Subject INNER JOIN (Item INNER JOIN ItemSubject ON Item.ItemID = ItemSubject.ItemID) ON Subject.SubjectID = ItemSubject.SubjectID","Subject.SubjectTypeID=10",,,"Corporate name subject heading
-1st ind. Put â€œ2â€ (Name in direct order)
-2nd ind. Put â€œ4â€ (Source not specified, include local headings)
+1st ind. Put “2” (Name in direct order)
+2nd ind. Put “4” (Source not specified, include local headings)
 $a Corporate name or jurisdiction name as entry element (NR)
 $x General subdivision
 $z Geographical subdivision
 ","ItemSubject-->Subject-->SubjectTextfor6XX where SubjectTypeID=10 =$x$z","No","Yes"
 "630",,"0","0","$a",,"[Title]![TitleText] & "" "" & Replace([Title]![MARCother],""^"",""$"")","Item INNER JOIN Title ON Item.ItemID = Title.ItemID","Title.TitleTypeID=15",,,"Uniform title subject heading
 1st ind. Nonfiling characters
-2nd ind. Put â€œ0â€ (LC subject headings)
+2nd ind. Put “0” (LC subject headings)
 $a Uniform title (NR)
 $p Name of part/section of a work
 $x general subdivision
 ","Title-->TitleTypeID=15
 Title-->TitleOffset = 1st ind.
 Title-->TitleText = $a","No","Yes"
-"650",,"0","0","All subfield in a string",,"Subject.SubjectTextfor6XX","Subject INNER JOIN (Item INNER JOIN ItemSubject ON Item.ItemID = ItemSubject.ItemID) ON Subject.SubjectID = ItemSubject.SubjectID","Subject.SubjectTypeID=50",,,"Topical subject heading
+"650",,"0","0","inline",,"Subject.SubjectTextfor6XX","Subject INNER JOIN (Item INNER JOIN ItemSubject ON Item.ItemID = ItemSubject.ItemID) ON Subject.SubjectID = ItemSubject.SubjectID","Subject.SubjectTypeID=50",,,"Topical subject heading
 1st ind. Nonfiling characters
-2nd ind. Put â€œ0â€ (LC subject headings)
+2nd ind. Put “0” (LC subject headings)
 $a Topical term (NR)
 $x General subdivision (R)
 $z Geographical subdivision (R)
 ","ItemSubject-->Subject-->SubjectTextfor6XX where SubjectTypeID=50 =$a$x$z","No","Yes"
-"700",,"Name.FormofEntry","[blank]","All subfield in a string",,"""$a"" & IIf([Name]![FormofEntry]=0,Trim([Name]![FirstName] & "" "" & [Name]![LastName]) & IIf(Right([Name]![FirstName] & [Name]![LastName],1)<>""."","".""),Trim([Name]![LastName]) & IIf([Name]![FirstName] Is Not Null,"", "" & Trim([Name]![FirstName])) & IIf(Right([Name]![LastName] & [Name]![FirstName],1)<>""."",""."")) & IIf([Name]![FullerName]<>"""",""$q("" & Trim([Name]![FullerName]) & "")"") & IIf([Name]![YearOfBirth]<>"""","",$d"" & Trim([Name]![YearOfBirth]))","Name INNER JOIN (Item INNER JOIN ItemName ON Item.ItemID = ItemName.ItemID) ON Name.NameID = ItemName.NameID","(((ItemName.NameSequence)>1) AND ((Name.NameTypeID)=2))",,,"Personal name added entry
+"700",,"Name.FormofEntry",,"inline",,"""$a"" & IIf([Name]![FormofEntry]=0,Trim([Name]![FirstName] & "" "" & [Name]![LastName]) & IIf(Right([Name]![FirstName] & [Name]![LastName],1)<>""."","".""),Trim([Name]![LastName]) & IIf([Name]![FirstName] Is Not Null,"", "" & Trim([Name]![FirstName])) & IIf(Right([Name]![LastName] & [Name]![FirstName],1)<>""."",""."")) & IIf([Name]![FullerName]<>"""",""$q("" & Trim([Name]![FullerName]) & "")"") & IIf([Name]![YearOfBirth]<>"""","",$d"" & Trim([Name]![YearOfBirth]))","Name INNER JOIN (Item INNER JOIN ItemName ON Item.ItemID = ItemName.ItemID) ON Name.NameID = ItemName.NameID","(((ItemName.NameSequence)>1) AND ((Name.NameTypeID)=2))",,,"Personal name added entry
 1st ind. Type of personal name entry element
   Put ""0"" if it is forename, ""1"" for Surname, ""3"" for family name
 2nd ind. Type of added entry, blank for no information provided
@@ -273,7 +273,7 @@ ItemName-->Name-->LastName + "","" + FirstName = $a
 ItemName-->Name-->NamePrefix=$c
 ItemName-->Name-->YearOfBirth=$d
 ","No","Yes"
-"710",,"2","[blank]","All subfield in a string",,"""$a"" & [Name]![LastName] & IIf([Name]![FirstName]<>"""","" "" & [Name]![FirstName]) & IIf(Right([Name]![LastName] & [Name]![FirstName],1)<>""."",""."")","Name INNER JOIN (Item INNER JOIN ItemName ON Item.ItemID = ItemName.ItemID) ON Name.NameID = ItemName.NameID","(((Name.NameTypeID)=3) AND ((ItemName.NameSequence)>1))",,,"Corporate name added entry
+"710",,"2",,"inline",,"""$a"" & [Name]![LastName] & IIf([Name]![FirstName]<>"""","" "" & [Name]![FirstName]) & IIf(Right([Name]![LastName] & [Name]![FirstName],1)<>""."",""."")","Name INNER JOIN (Item INNER JOIN ItemName ON Item.ItemID = ItemName.ItemID) ON Name.NameID = ItemName.NameID","(((Name.NameTypeID)=3) AND ((ItemName.NameSequence)>1))",,,"Corporate name added entry
 1st ind. Put ""2"" (Name in direct order)
 2nd ind. Type of added entry, blank for no information provided
 $a Corporate name or jurisdiction name as entry element (NR)
@@ -281,7 +281,7 @@ $a Corporate name or jurisdiction name as entry element (NR)
 ","ItemName-->Name where NameTypeID=3. Name data needs re-arrangement.
 
 ","No","Yes"
-"711",,"2","[blank]","All subfield in a string",,"""$a"" & [Name]![LastName] & IIf(IsNull([Name]![YearOfBirth]),"""",""$d"" & [Name]![YearOfBirth]) & IIf(IsNull([Name]![FirstName]),IIf([Name]![NamePrefix]<>"""",""$c"" & [Name]![NamePrefix]),""$c"" & [Name]![FirstName])","Name INNER JOIN (Item INNER JOIN ItemName ON Item.ItemID = ItemName.ItemID) ON Name.NameID = ItemName.NameID","(((Name.NameTypeID)=4) AND ((ItemName.NameSequence)>1))",,,"Meeting name added entry
+"711",,"2",,"inline",,"""$a"" & [Name]![LastName] & IIf(IsNull([Name]![YearOfBirth]),"""",""$d"" & [Name]![YearOfBirth]) & IIf(IsNull([Name]![FirstName]),IIf([Name]![NamePrefix]<>"""",""$c"" & [Name]![NamePrefix]),""$c"" & [Name]![FirstName])","Name INNER JOIN (Item INNER JOIN ItemName ON Item.ItemID = ItemName.ItemID) ON Name.NameID = ItemName.NameID","(((Name.NameTypeID)=4) AND ((ItemName.NameSequence)>1))",,,"Meeting name added entry
 1st ind. Put ""2"" (Name in direct order)
 2nd ind. Type of added entry, blank for no information provided
 $a Meeting name or jurisdiction name as entry element (NR)
@@ -294,29 +294,29 @@ $d Date of meeting -- when given outside parentheses (R)
 ","ItemName-->Name where NameTypeID=4. Name data needs re-arrangement.
 
 ","No","Yes"
-"856",,"1","[blank]","$u",,"Item.URI_FileLocat","Item",,,,"Electronic location and access
+"856",,"1",,"$u",,"Item.URI_FileLocat","Item",,,,"Electronic location and access
 1st ind. Access method, put ""1"" (FTP)
 2n ind. Relationship, blank for ""No information provided""
 $u Uniform Resource Identifier (R)
 $z Public note (R)
 ","Item-->URI_FileLocat=$u. However the data in this field just point to the folder location of the local PC. The only thing we know from this field is the existance of the file.","No","Yes"
-"926",,"[blank]","[blank]","$a$c$x",,"Trim([Language]![LanguageName] & IIf([Language]![EthnologueCode]<>"""",""$c"" & [Language]![EthnologueCode]) & IIf([Language]![LanguageComment]<>"""",""$x"" & [Language]![LanguageComment]))","[Language] INNER JOIN (Item INNER JOIN ItemLanguage ON Item.ItemID = ItemLanguage.ItemID) ON Language.LanguageID = ItemLanguage.LanguageID",,,,"Ethnologue code
+"926",,,,"$a$c$x",,"Trim([Language]![LanguageName] & IIf([Language]![EthnologueCode]<>"""",""$c"" & [Language]![EthnologueCode]) & IIf([Language]![LanguageComment]<>"""",""$x"" & [Language]![LanguageComment]))","[Language] INNER JOIN (Item INNER JOIN ItemLanguage ON Item.ItemID = ItemLanguage.ItemID) ON Language.LanguageID = ItemLanguage.LanguageID",,,,"Ethnologue code
 Both indicators are blank
 $a Language name
 $c Ethnologue code
 $x Comments
 ","ItemLanguage-->LanguageID. Need to get the real value from Language table","No","Yes"
-"952",,"[blank]","[blank]","All subfield in a string",,"$70$4 & IIf([Holding]![Status]=""R"",1,0) & ""$00$2ddc$b"" & Choose([Holding]![LocationID],"""",""BKK"",""CMX"") & ""$yBKS$1"" & IIf([Holding]![Status]=""M"",1,0) & ""$o"" & Trim([ClassNumber]![ClassNumberText] & "" "" & [Holding]![ItemPart]) & ""$a"" & Choose([Holding]![InventoryLocID],"""",""BKK"",""CMX"") & ""$p"" & Trim([Holding]![HoldingNumber]) & IIf([ShelfLocation]![ShelfLocationName]<>""???"",""$c"" & Trim([ShelfLocation]![ShelfLocationName])) & ""$d"" & Format([Holding]![LastUpdate],""yyyy-mm-dd"") & IIf([Holding]![Enumeration]<>"""",""$h"" & [Holding]![Enumeration]) & IIf(Len([Holding]![HoldingNumber])>6,Switch(Right([Holding]![HoldingNumber],1)=""b"",""$t2"",Right([Holding]![HoldingNumber],1)=""c"",""$t3"",Right([Holding]![HoldingNumber],1)=""d"",""$t4"",Right([Holding]![HoldingNumber],1)=""e"",""$t5"",Right([Holding]![HoldingNumber],1)=""f"",""$t6"",Right([Holding]![HoldingNumber],1)=""g"",""$t7"")) & IIf([Holding]![HoldingComment]<>"""",""$x"" & Trim([Holding]![HoldingComment]))","Item INNER JOIN (ClassNumber INNER JOIN (Holding INNER JOIN ShelfLocation ON Holding.ShelfLocationID = ShelfLocation.ShelfLocationID) ON ClassNumber.ClassNumberID = Holding.ClassNumberID) ON Item.ItemID = Holding.ItemID",,,,"Holdings
+"952",,,,"inline",,"$70$4 & IIf([Holding]![Status]=""R"",1,0) & ""$00$2ddc$b"" & Choose([Holding]![LocationID],"""",""BKK"",""CMX"") & ""$yBKS$1"" & IIf([Holding]![Status]=""M"",1,0) & ""$o"" & Trim([ClassNumber]![ClassNumberText] & "" "" & [Holding]![ItemPart]) & ""$a"" & Choose([Holding]![InventoryLocID],"""",""BKK"",""CMX"") & ""$p"" & Trim([Holding]![HoldingNumber]) & IIf([ShelfLocation]![ShelfLocationName]<>""???"",""$c"" & Trim([ShelfLocation]![ShelfLocationName])) & ""$d"" & Format([Holding]![LastUpdate],""yyyy-mm-dd"") & IIf([Holding]![Enumeration]<>"""",""$h"" & [Holding]![Enumeration]) & IIf(Len([Holding]![HoldingNumber])>6,Switch(Right([Holding]![HoldingNumber],1)=""b"",""$t2"",Right([Holding]![HoldingNumber],1)=""c"",""$t3"",Right([Holding]![HoldingNumber],1)=""d"",""$t4"",Right([Holding]![HoldingNumber],1)=""e"",""$t5"",Right([Holding]![HoldingNumber],1)=""f"",""$t6"",Right([Holding]![HoldingNumber],1)=""g"",""$t7"")) & IIf([Holding]![HoldingComment]<>"""",""$x"" & Trim([Holding]![HoldingComment]))","Item INNER JOIN (ClassNumber INNER JOIN (Holding INNER JOIN ShelfLocation ON Holding.ShelfLocationID = ShelfLocation.ShelfLocationID) ON ClassNumber.ClassNumberID = Holding.ClassNumberID) ON Item.ItemID = Holding.ItemID",,,,"Holdings
 Please find the separate sheet for explaination.
 ",,"Yes","Yes"
-"961",,"[blank]","[blank]","$a",,"Item.SecurityLevel","Item",,,,"Security level
+"961",,,,"$a",,"Item.SecurityLevel","Item",,,,"Security level
 Blank to both indicators
 $a Security level
 ","Item-->SecurityLevel","Yes","No"
-"975",,"[blank]","[blank]","$a",,"Item.ItemNumber","Item",,,,"Item Number in Access database
+"975",,,,"$a",,"Item.ItemNumber","Item",,,,"Item Number in Access database
 Blank to both indicators
 $a Item Number
 ","Item-->ItemNumber","Yes","No"
-"977",,"[blank]","[blank]","$a",,"Item.UpdatedBy","Item",,,,"Update by
+"977",,,,"$a",,"Item.UpdatedBy","Item",,,,"Update by
 Blank to both indicators
 $a Name of person doing update","Item-->UpdateBy","Yes","No"
