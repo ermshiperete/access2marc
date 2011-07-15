@@ -16,14 +16,17 @@ class Processor(object):
 	def LoadItemIDs(self):
 		# query the db for a list of all item ids to extract
 		self.itemids = [
-				row.ItemID for row in self.db.execute('select ItemID from Item')]
+				#row.ItemID for row in self.db.execute('SELECT TOP 2 ItemID FROM Item ORDER BY ItemID')]
+				row.ItemID for row in self.db.execute("SELECT ItemID FROM Item WHERE ItemID = 491")]
 
 	def WriteMarcRecords(self, filename):
-		for id in self.itemids:
-			builder = MarcRecordBuilder(id, self.instructions, self.db)
-			rec = builder.GetMarcRecord()
-			out = codecs.open(filename, 'w', 'utf-8')
-			out.write(rec.as_marc())  # this should probably be unicode. how??
+		#with codecs.open(filename, 'w', 'utf-8') as out:
+		with open(filename, 'wb') as out:
+			for id in self.itemids:
+				builder = MarcRecordBuilder(id, self.instructions, self.db)
+				rec = builder.GetMarcRecord()
+				print(rec)
+				out.write(rec.as_marc())
 
 
 if __name__ == '__main__':

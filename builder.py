@@ -3,6 +3,11 @@ import csv
 import pyodbc
 import pymarc
 from logger import Logger
+try:
+	import custom
+except SyntaxError as e:
+	print("Bummer: It looks like there is a syntax error in the custom.py script file.  Custom functions are temporarily disabled.\nMessage: %s" % e)
+	raise
 
 "Exceptions for the MarcBuilder classes"
 class BuilderException(Exception):
@@ -61,10 +66,27 @@ class MarcRecordBuilder(Logger):
 
 
 	def GetMarcRecord(self):
-		rec = pymarc.Record()
+		rec = pymarc.Record('', False, True) # force Unicode record
 		for fieldbuilder in self.Fields:
-			rec.add_field(fieldbuilder.GetMarcField())
+			field = fieldbuilder.GetMarcField()
+			if field.tag == '000':
+				self.Debug("Leader before: '%s'" % rec.leader)
+				self._addToLeader(rec, field.value())
+				self.Debug("Leader after: '%s'" % rec.leader)
+			else:
+				rec.add_field(fieldbuilder.GetMarcField())
 		return rec
+
+
+	def _addToLeader(self, rec, incomingdata):
+		# replace leader data char by char with input data
+		leader = list(rec.leader)
+		data = list(incomingdata)
+		for index, char in enumerate(data):
+			if char != ' ' and index < len(leader):
+				leader[index] = char
+		rec.leader = "".join(leader)
+
 
 
 
@@ -78,19 +100,19 @@ class SQLQuery(Logger):
 
 
 	def FetchData(self):
-		qselect = "SELECT %s as data" % self.map['SQLSelect']
-		return self._fetch(qselect)
+		qselect = "SELECT %s" % self.map['SQLSelect']
+		return self._fetch(qselect, 'data')
 
 
 	def FetchIndicator(self, indicator):
 		key = "I%d_SQLSelect" % indicator
 		if self.map[key] == "":
 			return " "
-		qselect = "SELECT %s as data" % self.map[key]
-		return self._fetch(qselect)
+		qselect = "SELECT %s" % self.map[key]
+		return self._fetch(qselect, 'indicator'+str(indicator))
 
 
-	def _fetch(self, qselect):
+	def _fetch(self, qselect, mode='data'):
 		qfrom = "FROM %s" % self.map['SQLFrom']
 		witemid = "Item.ItemID = %s" % self.id
 		if self.map['SQLWhere'].strip():
@@ -102,15 +124,28 @@ class SQLQuery(Logger):
 		self.Debug(sql)
 		try:
 			self.qo.execute(sql)
-			row = self.qo.fetchone()
+			rows = self.qo.fetchall()
 		except pyodbc.Error as e:
 			self.Log("AccessDB Error: %s" % e[1])
-			row = ""
+			rows = []
 
-		if row and 0 in row:
-			return str(row[0]).strip()
-		else:
-			return ""
+		processedrows = []
+		for row in rows:
+			if row and len(row) > 0:
+				result = str(row[0]).strip()
+				if 'custom' in sys.modules and self.map['Python']:
+					funcend = ""
+					if mode != 'data':
+						funcend = "_" + mode
+					funccall = "custom.%s(row)" % (self.map['Python'] + funcend)
+					try:
+						result = eval(funccall)
+						self.Debug("before %s = %s" % (funccall, str(row)))
+						self.Debug("after %s = %s" % (funccall, result))
+					except AttributeError:
+						self.Log("Warning: %s isn't defined in custom.py.  Skipping." % funccall)
+				processedrows.append(result)
+		return processedrows
 
 
 
@@ -140,7 +175,7 @@ class MarcFixedFieldBuilder(Logger):
 				endpos = int(positions[positions.index('-')+1:])
 				expectedlen = endpos - startpos + 1
 				if len(data) != expectedlen:
-					self.Log("Indicator Length Error: expected %d, was %d" % (
+					self.Debug("Indicator Length Error: expected %d, was %d" % (
 						expectedlen, len(data)))
 
 				ctr = 0
@@ -153,23 +188,19 @@ class MarcFixedFieldBuilder(Logger):
 			else:
 				# single position
 				if len(data) != 1:
-					self.Log("Indicator Length Error: expected 1, was %d" % (
+					self.Debug("Indicator Length Error: expected 1, was %d" % (
 							len(data)))
 				datamap.append((positions, data))
 			return datamap
 
 
 		for line in self.Instructions:
-			self.Debug("building fixed field %s (%s)" % (self.Tag,
-				line['FFPosition']))
 			positions, data = self._doQuery(line)
-			self.Debug("positions = %s , data = %s" % (positions, data))
+			self.Debug("fixed field %s (%s) = %s" % (self.Tag, positions, data))
 
 			# split data into characters
 			for position, char in splitData(positions, data):
 				self.DataChar[position] = char
-
-			self.Debug(str(self.DataChar))
 
 
 	def _doQuery(self, line):
@@ -182,7 +213,11 @@ class MarcFixedFieldBuilder(Logger):
 			data = line['DefaultValue'].strip()
 
 		# return position range and data
-		return (line['FFPosition'], data)
+		if len(data) > 0:
+			return (line['FFPosition'], str(data[0]).strip())
+		else:
+			return (line['FFPosition'], "")
+
 
 
 
@@ -190,13 +225,14 @@ class MarcFixedFieldBuilder(Logger):
 		data = ''
 		for i in range(0, 100):
 			if i in self.DataChar:
+				#self.Debug("%02d = '%s'" % (i, self.DataChar[i]))
 				data += self.DataChar[i]
 			else:
 				data += ' '
 
 		# trim fixed field based upon tag
 		data = {
-				'000': lambda d: d.rstrip(),
+				'000': lambda d: d[:25],
 				'001': lambda d: d.rstrip(),
 				'003': lambda d: d.rstrip(),
 				'005': lambda d: d[:16],
@@ -204,7 +240,9 @@ class MarcFixedFieldBuilder(Logger):
 				'008': lambda d: d[:40]
 				}[self.Tag](data)
 
-		return pymarc.Field(self.Tag, data)
+		#self.Debug("%s = '%s'" % (self.Tag, data))
+		return pymarc.Field(tag=self.Tag, data=data)
+
 
 
 
@@ -226,16 +264,16 @@ class MarcFieldBuilder(Logger):
 	def _build(self):
 
 		for line in self.Instructions:
-			self.Debug("building field %s (subfield %s)" % (self.Tag,
-				line['Subfield']))
 
 			# basically just do this for the first line
 			if (len(self.Indicators) == 0):
 				self.Indicators.append(self._doIndicatorQuery(line, 1))
 				self.Indicators.append(self._doIndicatorQuery(line, 2))
 
-			self.SubFields.extend(self._doSubfieldQuery(line))
-			self.Debug(self.SubFields)
+			subfields = self._doSubfieldQuery(line)
+			self.Debug("Subfield %s%s = " % (self.Tag, line['Subfield']))
+			self.Log(str(subfields) + '\n')
+			self.SubFields.extend(subfields)
 
 
 
@@ -258,6 +296,40 @@ class MarcFieldBuilder(Logger):
 
 
 	def _doSubfieldQuery(self, line):
+		subfield = line['Subfield'].strip("$| ")
+		if line['SQLSelect']:
+			q = SQLQuery(self.qo, self.ItemID, line)
+
+			# data is a list, in case there are repeatable subfields
+			data = q.FetchData()
+
+			# if this is a repeatable field, we want to process all results
+			if line['Repeatable'].lower().find('yes') > -1:
+				result = list()
+				for item in data:
+					if item:
+						result.extend(self._processSubfieldResult(subfield, item))
+				return result
+
+			# otherwise just process the first one returned (and warn if more than one returned)
+			else:
+				if len(data) > 1:
+					self.Debug("Warning: Expected 1 but SQL returned %s rows" % len(data))
+				if len(data) > 0 and len(data[0].strip()) > 0:
+					print("data = '%s'" % data[0])
+					return self._processSubfieldResult(subfield, data[0])
+				else:
+					return ()
+
+		elif line['DefaultValue'].strip():
+			# if there is a default value, use that
+			return ( subfield, line['DefaultValue'].strip() )
+		else:
+			return ()
+
+
+
+	def _processSubfieldResult(self, subfield, data):
 		def _splitData(data):
 			# state machine
 			state = 'DATA'
@@ -278,30 +350,25 @@ class MarcFieldBuilder(Logger):
 					data += c
 			return result
 
-		# if there is a default value, use that
-		if line['SQLSelect']:
-			q = SQLQuery(self.qo, self.ItemID, line)
-			data = q.FetchData()
 
-			subfield = line['Subfield'].strip("$|")
-			# if the 'subfield' column contains a subfield char, then
-			# return a list in this format:
-			# ['subfield', 'subfield data']
-			if len(subfield) == 1:
-				return [subfield, data]
+		# if the 'subfield' column contains a subfield char, then
+		# return a list in this format:
+		# ['subfield', 'subfield data']
+		if len(subfield) == 1:
+			return (subfield, data)
 
-			# if the 'subfield' column contains the string 'inline',
-			# then parse the result and make a list in the format:
-			# ['subfield1', 'data1', 'subfield2', 'data2', ... ]
-			elif subfield == 'inline':
-				return _splitData(data)
+		# if the 'subfield' column contains the string 'inline',
+		# then parse the result and make a list in the format:
+		# ['subfield1', 'data1', 'subfield2', 'data2', ... ]
+		elif subfield == 'inline':
+			return _splitData(data)
 
-			# error: could not get a valid subfield
-			else:
-				return []
-
+		# error: could not get a valid subfield
 		else:
-			return [ line['Subfield'].strip(), line['DefaultValue'].strip() ]
+			return ()
+
+
+
 
 
 	def GetMarcField(self):
