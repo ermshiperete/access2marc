@@ -16,8 +16,8 @@ class Processor(object):
 	def LoadItemIDs(self):
 		# query the db for a list of all item ids to extract
 		self.itemids = [
-				#row.ItemID for row in self.db.execute('SELECT ItemID FROM Item')]
-				row.ItemID for row in self.db.execute('SELECT ItemID FROM Item WHERE ItemID > 2502')]
+				row.ItemID for row in self.db.execute('SELECT ItemID FROM Item')]
+				#row.ItemID for row in self.db.execute('SELECT ItemID FROM Item WHERE ItemID > 2502')]
 				#row.ItemID for row in self.db.execute("SELECT ItemID FROM Item WHERE ItemID = 2502")]
 
 	def WriteMarcRecords(self, filename):
