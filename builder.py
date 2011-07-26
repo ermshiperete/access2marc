@@ -23,12 +23,12 @@ class IndicatorInvalid(BuilderException):
 
 class MarcRecordBuilder(Logger):
 	def __init__(self, itemID, instructions, queryObject):
-		Logger.__init__(self, sys.stdout, True, 'RecBuild')
+		Logger.__init__(self, sys.stdout, False, 'RecBuild')
 		self.ItemID = itemID
 		self.qo = queryObject
 		self.Fields = list()
 		self.Instructions = instructions
-		self.Debug("building record %s" % itemID)
+		self.Log("\nProcessing Record %s" % itemID)
 		self._build()
 
 	def _build(self):
@@ -73,8 +73,12 @@ class MarcRecordBuilder(Logger):
 				self.Debug("Leader before: '%s'" % rec.leader)
 				self._addToLeader(rec, field.value())
 				self.Debug("Leader after: '%s'" % rec.leader)
-			else:
-				rec.add_field(fieldbuilder.GetMarcField())
+			elif field.tag < '010':
+				if len(field.data) > 0:
+					rec.add_field(field)
+			else: # normal field having subfields
+				if len(field.subfields) > 0:
+					rec.add_field(field)
 		return rec
 
 
@@ -93,7 +97,7 @@ class MarcRecordBuilder(Logger):
 
 class SQLQuery(Logger):
 	def __init__(self, qo, id, line):
-		Logger.__init__(self, sys.stdout, True, 'Query')
+		Logger.__init__(self, sys.stdout, False, 'Query')
 		self.qo = qo
 		self.id = id
 		self.map = line
@@ -109,7 +113,11 @@ class SQLQuery(Logger):
 		if self.map[key] == "":
 			return " "
 		qselect = "SELECT %s" % self.map[key]
-		return self._fetch(qselect, 'indicator'+str(indicator))
+		result = self._fetch(qselect, 'indicator'+str(indicator))
+		if len(result) > 0:
+			return result[0]
+		else:
+			return " "
 
 
 	def _fetch(self, qselect, mode='data'):
@@ -126,13 +134,15 @@ class SQLQuery(Logger):
 			self.qo.execute(sql)
 			rows = self.qo.fetchall()
 		except pyodbc.Error as e:
-			self.Log("AccessDB Error: %s" % e[1])
+			self.Log("\n\nAccessDB Error:\n\t%s" % e[1])
+			if not self.verbose:
+				self.Log("\nOffending statement:\n\t%s\n" % sql)
 			rows = []
 
 		processedrows = []
 		for row in rows:
-			if row and len(row) > 0:
-				result = str(row[0]).strip()
+			if row and len(row) > 0 and row[0] is not None:
+				result = unicode(row[0]).strip()
 				if 'custom' in sys.modules and self.map['Python']:
 					funcend = ""
 					if mode != 'data':
@@ -143,7 +153,7 @@ class SQLQuery(Logger):
 						self.Debug("before %s = %s" % (funccall, str(row)))
 						self.Debug("after %s = %s" % (funccall, result))
 					except AttributeError:
-						self.Log("Warning: %s isn't defined in custom.py.  Skipping." % funccall)
+						self.Debug("Warning: %s isn't defined in custom.py.  Skipping." % funccall)
 				processedrows.append(result)
 		return processedrows
 
@@ -153,7 +163,7 @@ class SQLQuery(Logger):
 class MarcFixedFieldBuilder(Logger):
 
 	def __init__(self, itemID, instructions, queryObject):
-		Logger.__init__(self, sys.stdout, True, 'FFieldBuild')
+		Logger.__init__(self, sys.stdout, False, 'FFieldBuild')
 		self.ItemID = itemID
 		self.DataChar = dict()
 
@@ -174,22 +184,24 @@ class MarcFixedFieldBuilder(Logger):
 				startpos = int(positions[0:positions.index('-')])
 				endpos = int(positions[positions.index('-')+1:])
 				expectedlen = endpos - startpos + 1
-				if len(data) != expectedlen:
-					self.Debug("Indicator Length Error: expected %d, was %d" % (
-						expectedlen, len(data)))
+				#if len(data) != expectedlen:
+				#    self.Debug("Indicator Length Warning: expected %d, was %d" % (
+				#        expectedlen, len(data)))
 
 				ctr = 0
+				#expectedsize = endpos - startpos + 1
+				actualsize = len(data)
 				for x in range(startpos, endpos + 1):
-					if data:
+					if ctr < actualsize:
 						datamap.append((x, data[ctr]))
 					else:
 						datamap.append((x, " "))
 					ctr += 1
 			else:
 				# single position
-				if len(data) != 1:
-					self.Debug("Indicator Length Error: expected 1, was %d" % (
-							len(data)))
+				#if len(data) != 1:
+				#    self.Debug("Indicator Length Error: expected 1, was %d" % (
+				#            len(data)))
 				datamap.append((positions, data))
 			return datamap
 
@@ -248,7 +260,7 @@ class MarcFixedFieldBuilder(Logger):
 
 class MarcFieldBuilder(Logger):
 	def __init__(self, itemID, instructions, queryObject):
-		Logger.__init__(self, sys.stdout, True, 'SFieldBuild')
+		Logger.__init__(self, sys.stdout, False, 'SFieldBuild')
 		self.ItemID = itemID
 		self.SubFields = list() # eg. ['a', 'the title', 'c', 'the author']
 		self.Indicators = list() # eg. ['0', '1']
@@ -272,7 +284,6 @@ class MarcFieldBuilder(Logger):
 
 			subfields = self._doSubfieldQuery(line)
 			self.Debug("Subfield %s%s = " % (self.Tag, line['Subfield']))
-			self.Log(str(subfields) + '\n')
 			self.SubFields.extend(subfields)
 
 
@@ -315,8 +326,7 @@ class MarcFieldBuilder(Logger):
 			else:
 				if len(data) > 1:
 					self.Debug("Warning: Expected 1 but SQL returned %s rows" % len(data))
-				if len(data) > 0 and len(data[0].strip()) > 0:
-					print("data = '%s'" % data[0])
+				if len(data) > 0 and data[0] is not None and len(data[0]) > 0:
 					return self._processSubfieldResult(subfield, data[0])
 				else:
 					return ()

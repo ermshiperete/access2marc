@@ -34,10 +34,33 @@ def ItemNoteCode(row):
 def MainEntryPersonalName_a(row):
 	firstname = row[0].strip(",.")
 	lastname = row[1].strip(",.")
-	print(row)
 	result = ""
 	if lastname:
 		result += lastname
 	if firstname:
 		result += ", " + firstname + "."
 	return result
+
+
+def Process245a(row):
+	title = row[0]
+	statement = row[1]
+	if title.find(':') > -1:
+		return title[0:title.index(':')+1]
+	else:
+		if statement is not None and statement != '':
+			return title + ' /' # add slash for expected statement of resp.
+		else:
+			return title
+
+
+def Process245b(row):
+	title = row[0]
+	statement = row[1]
+	if title.find(':') > -1:
+		if statement is not None and statement != '':
+			return title[title.index(':')+1:] + ' /' # slash for statement of resp.
+		else:
+			return title[title.index(':')+1:]
+	else:
+		return None

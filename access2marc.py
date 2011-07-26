@@ -16,8 +16,9 @@ class Processor(object):
 	def LoadItemIDs(self):
 		# query the db for a list of all item ids to extract
 		self.itemids = [
-				#row.ItemID for row in self.db.execute('SELECT TOP 2 ItemID FROM Item ORDER BY ItemID')]
-				row.ItemID for row in self.db.execute("SELECT ItemID FROM Item WHERE ItemID = 491")]
+				#row.ItemID for row in self.db.execute('SELECT ItemID FROM Item')]
+				row.ItemID for row in self.db.execute('SELECT ItemID FROM Item WHERE ItemID > 2502')]
+				#row.ItemID for row in self.db.execute("SELECT ItemID FROM Item WHERE ItemID = 2502")]
 
 	def WriteMarcRecords(self, filename):
 		#with codecs.open(filename, 'w', 'utf-8') as out:
@@ -25,7 +26,6 @@ class Processor(object):
 			for id in self.itemids:
 				builder = MarcRecordBuilder(id, self.instructions, self.db)
 				rec = builder.GetMarcRecord()
-				print(rec)
 				out.write(rec.as_marc())
 
 
