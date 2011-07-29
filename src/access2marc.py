@@ -1,6 +1,6 @@
 import csv
 import pyodbc
-import codecs
+
 from builder import MarcRecordBuilder
 
 class Processor(object):
