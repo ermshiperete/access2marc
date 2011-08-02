@@ -383,3 +383,5 @@ class MarcFieldBuilder(Logger):
 
 	def GetMarcField(self):
 		return pymarc.Field(self.Tag, self.Indicators, self.SubFields)
+
+

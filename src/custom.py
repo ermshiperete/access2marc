@@ -1,6 +1,7 @@
 # define custom functions here for use in processing SQL output
 
 import re
+import urllib
 
 def IllustrativeMatterCode(row):
 	data = row[0]
@@ -84,56 +85,58 @@ def Process245b(row):
 	else:
 		return None
 
+REGEX008DATE = re.compile(r'(\d+)(\D+)?(\d+)?')
+REGEX856URL = re.compile(r'#(.+)#')
+
 def Process008Date1(row):
 	date = row[0]
-	p = re.compile(r'(c)?(\d+)[\s\.-]*(\d+)?')
-	m = p.search(date)
+	m = REGEX008DATE.search(date)
 	if m:
-		mode = 'normal'
-		if m.group(1) == 'c':
-			mode = 'addzeros'
-		return _fixDate(m.group(2), mode)
+		return str(m.group(1)).ljust(4, '0') # fill out year with zeros, if necessary
 	else:
 		return ""
 
-
-
-def _fixDate(digits, mode='normal'):
-	if not digits:
-		return ""
-
-	if mode == 'addzeros' :
-		return str(digits).ljust(4, '0')
-	elif int(digits) < 21:
-		return "20%02d" % int(digits)
-	elif int(digits) > 20 and int(digits) < 100:
-		return "19%02d" % int(digits)
-	elif int(digits) < 1000:
-		return "%03d0" % int(digits)
-	else:
-		return str(digits)
-
-
-	# examples of Date1 to process
-	# 19
-	# c1995
-	# c1995-c2000
-	# 2000-01
-	# 2003
-	# 05-07
 
 def Process008Date2(row):
 	date1 = row[0]
 	date2 = row[1]
-	p = re.compile(r'(\d+)[\s\.-]*(\d+)?')
 
-	if date2 and date2 != "" and p.search(date2):
-		return _fixDate(p.search(date2).group(1))
+	if date2 and date2 != "" and REGEX008DATE.search(date2):
+		# fill out year with zeros, if necessary
+		return str(REGEX008DATE.search(date2).group(1)).ljust(4, '0')
 
-	if p.search(date1):
-		return _fixDate(p.search(date1).group(2))
-
+	m = REGEX008DATE.search(date1)
+	if m and m.group(3):
+		d1 = m.group(1)
+		d2 = m.group(3)
+		if len(d2) == 4: # 4 digit year
+			return d2
+		else: # make d2 a 4 digit year
+			newdate = [c for c in reversed(d1)] # d1 is a 4 digit year
+			d2rev = [c for c in reversed(d2)]
+			for i in range(len(d2rev)):
+				newdate[i] = d2rev[i]
+			return "".join(reversed(newdate))
 	return ""
+
+def Process856(row):
+	string = row[0]
+	urlpath = "http://library.asia.sil.org/e-resources/mseag/"
+	m = REGEX856URL.search(string)
+	if m:
+		resource = m.group(1)
+		if resource.startswith("DigiData"): # already urlencoded
+			return urlpath + resource
+		else:
+			if resource.find("DigiData"):
+				resource = resource[resource.index("DigiData"):]
+				return urlpath + urllib.quote(resource.replace('\\', '/'), "/()")
+			else:
+				return string # give up
+
+	return string
+
+
 
 
 

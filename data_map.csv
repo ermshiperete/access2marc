@@ -13,15 +13,15 @@
 ",,
 "008","06",,,,,"DateType.DateTypeID","DateType INNER JOIN Item ON DateType.DateTypeID = Item.DateTypeID",,,,"No",,"Type of date","Item-->DateTypeID, need to get the real value from DateType table. Value is compatible with MARC standard
 ",,
-"008","07-10",,,,,"Date1","Item","Date1 <> 'None'",,,"No",,"Date 1","Item-->Date1",,
-"008","11-14",,,,,"Date2","Item","Date2 <> 'None'",,,"No",,"Date 2","Item-->Date2",,
+"008","07-10",,,,,"Date1","Item","Date1 <> 'None'",,"Process008Date1","No",,"Date 1","Item-->Date1",,
+"008","11-14",,,,,"Date1, Date2","Item","Date2 <> 'None'",,"Process008Date2","No",,"Date 2","Item-->Date2",,
 "008","15-17",,,,,"Item.PubCountryCode","Item",,,,"No",,"Place of publication, production or execution","Item-->PubCountryCode",,
 "008","18",,,,,"IllustrativeMatter","Item","IllustrativeMatter <> 'None'",,"IllustrativeMatterCode","No",,"Illustrations","Mark the appropriate value with the value  from Item-->IllustrativeMatter.
 “a” illustrations
 “b” maps
 ",,"Iif(InStr(1,[Item]![IllustrativeMatter],""ill"")>0,""a"",IIf(InStr(1,[Item]![IllustrativeMatter],""map"")>0,""b""))"
-,"19",,,,,"IllustrativeMatter","Item",,,"IllustrativeMatterCode2",,,,,,
-,"20-21",,,,,,,,,,,,,,,
+"008","19",,,,,"IllustrativeMatter","Item",,,"IllustrativeMatterCode2",,,,,,
+"008","20-21",,,,,,,,,,,,,,,
 "008","18",,,,,,,,,,,,"Frequency (For Serial)","Item-->FrequencyID. However there is no data in this field.",,
 "008","22",,,,,,,,,,"No",,"Target audience. Blank this field","Nil",,
 "008","23",,,,,"MediaType.MediaTypeCode","MediaType INNER JOIN Item ON MediaType.MediaTypeID = Item.MediaTypeID","MediaType.MediaTypeCode <> '\'",,,"No",,"Form of item","Item-->MediaTypeID, need to get the real value from MediaType table. Value need conversion, see MediaType worksheet
@@ -138,7 +138,7 @@ $c Location of meeting -- when given outside parentheses (NR)
 $d Date of meeting -- when given outside parentheses (R)
 #:$d Date of meeting -- when given inside parentheses (R)
 .$e Subordinate unit entered under a meeting name (R)","ItemName-->Name where NameTypeID=4. Name data needs re-arrangement.","No",
-"130",,"inline","0",,," [Title]![TitleText] & ' ' & Replace([Title]![MARCother],'^','$')","Item INNER JOIN Title ON Item.ItemID = Title.ItemID","(Title.TitleTypeID)=12",,,"No",,"Uniform main title entry
+"130",,"inline","0",,,"'$a' & [Title]![TitleText] & ' ' & Replace([Title]![MARCother],'^','$')","Item INNER JOIN Title ON Item.ItemID = Title.ItemID","Title.TitleTypeID = 12 AND Title.MARCOther <> ''",,,"No",,"Uniform main title entry
 1st ind. Nonfiling characters
 2nd ind. Blank
 $a Uniform title (NR)
@@ -150,7 +150,7 @@ $s Version - or edition of a work (NR)
 Title-->TitleOffset = 1st ind.
 Title-->TitleText = $a
 Title-->MARCother append to the end of $a, needs conversion of some control characters","No",
-"240",,"inline","1","0",," [Title]![TitleText] & ' ' & Replace([Title]![MARCother],'^','$')","Item INNER JOIN Title ON Item.ItemID = Title.ItemID","(Title.TitleTypeID)=16",,,"No",,"Uniform title
+"240",,"inline","1","0",,"'$a' & [Title]![TitleText] & ' ' & Replace([Title]![MARCother],'^','$')","Item INNER JOIN Title ON Item.ItemID = Title.ItemID","(Title.TitleTypeID)=16 AND Title.MARCOther <> ''",,,"No",,"Uniform title
 1st ind. Put “1” (Display specifications)
 2nd ind. Nonfiling characters
 $a Uniform title (NR)
@@ -310,7 +310,7 @@ $a Corporate name or jurisdiction name as entry element (NR)
 $x General subdivision
 $z Geographical subdivision
 ","ItemSubject-->Subject-->SubjectTextfor6XX where SubjectTypeID=10 =$x$z","No",
-"630",,"a","0","0",,"[Title]![TitleText] & ' ' & Replace([Title]![MARCother],'^','$')","Item INNER JOIN Title ON Item.ItemID = Title.ItemID","Title.TitleTypeID=15",,,"Yes",,"Uniform title subject heading
+"630",,"inline","0","0",,"$a' & [Title]![TitleText] & ' ' & Replace([Title]![MARCother],'^','$')","Item INNER JOIN Title ON Item.ItemID = Title.ItemID","Title.TitleTypeID=15 AND Title.MARCOther <> ''",,,"Yes",,"Uniform title subject heading
 1st ind. Nonfiling characters
 2nd ind. Put “0” (LC subject headings)
 $a Uniform title (NR)

@@ -33,8 +33,8 @@ if __name__ == '__main__':
 	print('Running Access To Marc')
 
 	# csv file, dbconnstring and output filename should all be command line options
-	connstring = "Driver={Microsoft Access Driver (*.mdb, *.accdb)};Dbq=%s;Uid=%s;Pwd=%s" % (r'Setup MSEA lib catalog\Library2forCM.mdb', 'developer', 'r0ss')
-	processor = Processor('data_map.csv', connstring)
+	connstring = "Driver={Microsoft Access Driver (*.mdb, *.accdb)};Dbq=%s;Uid=%s;Pwd=%s" % (r'c:/src/access2marc/Setup MSEA lib catalog/Library2forCM.mdb', 'developer', 'r0ss')
+	processor = Processor('c:/src/access2marc/data_map.csv', connstring)
 
 	processor.LoadItemIDs()
-	processor.WriteMarcRecords('output.marc')
+	processor.WriteMarcRecords('c:/src/access2marc/output.marc')
