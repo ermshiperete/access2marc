@@ -38,10 +38,13 @@ class customTest(unittest.TestCase):
 		self.assertEqual("1962", Process008Date2(["c1961,1962", ""]))
 		self.assertEqual("", Process008Date2(["c[1990]", ""]))
 
+
+
 	def testProcess856_CleansUpURL(self):
 		self.assertEqual("http://library.asia.sil.org/e-resources/mseag/DigiData/495.992%20Kensiw%20(Maniq)/B10212.pdf", Process856([r"#D:\LibrData\DigiData\495.992 Kensiw (Maniq)\B10212.pdf#"]))
 		self.assertEqual("http://library.asia.sil.org/e-resources/mseag/DigiData/572.598%20Haroi,Roglai,Chru,Cham%20anthropology/B01898.pdf", Process856([r"DigiData\572.598 Haroi,Roglai,Chru,Cham anthropology\B01898.pdf#DigiData/572.598%20Haroi,Roglai,Chru,Cham%20anthropology/B01898.pdf#"]))
 		self.assertEqual("http://sealang.net/archives/mks/16-17.htm", Process856([r"http://sealang.net/archives/mks/16-17.htm"]))
+
 
 
 
