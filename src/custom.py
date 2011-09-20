@@ -133,10 +133,20 @@ def Process856(row):
 				return urlpath + urllib.quote(resource.replace('\\', '/'), "/()")
 			else:
 				return string # give up
-
 	return string
 
 
+def Process700a(row):
+	formOfEntry = row[0]
+	firstName = row[1]
+	lastName = row[2]
+	if formOfEntry == '0':
+		return firstName + ' ' + lastName.strip('.') + '.'
+	else:
+		if len(firstName) > 0:
+			return lastName + ', ' + firstName
+		else:
+			return lastName
 
 
 
