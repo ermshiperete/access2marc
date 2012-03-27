@@ -39,11 +39,20 @@ def MainEntryPersonalName(row):
 	lastname = row[1]
 	fullname = row[2]
 	year = row[3]
+	formofentry = row[4]
+	if not formofentry:
+		formofentry = '1'
 	result = "$a"
-	if lastname:
-		result += lastname.strip(",.")
-	if firstname:
-		result += ", " + firstname.strip(",.") + "."
+	if formofentry == '0':
+		if firstname:
+			result += firstname.strip(",.")
+		if lastname:
+			result += " " + lastname.strip(",.")
+	else:
+		if lastname:
+			result += lastname.strip(",.")
+		if firstname:
+			result += ", " + firstname.strip(",.") + "."
 	if fullname:
 		result += " $q(%s)" % fullname.strip()
 	if year:
@@ -83,13 +92,15 @@ def Process245a(row):
 def Process245b(row):
 	title = row[0]
 	statement = row[1]
+	returnval = ""
 	if title.find(':') > -1:
 		if statement is not None and statement != '':
-			return title[title.index(':')+1:] + ' /' # slash for statement of resp.
+			returnval = title[title.index(':')+1:] + ' /' # slash for statement of resp.
 		else:
-			return title[title.index(':')+1:]
+			returnval = title[title.index(':')+1:]
 	else:
-		return None
+		returnval = ""
+	return returnval.strip()
 
 REGEX008DATE = re.compile(r'(\d+)(\D+)?(\d+)?')
 REGEX856URL = re.compile(r'#(.+)#')
