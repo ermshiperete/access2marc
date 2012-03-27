@@ -7,9 +7,12 @@ class Logger(object):
 
 	def Debug(self, msg, newline = True):
 		if self.verbose:
-			if len(self.label) > 0 and newline and len(str(msg).strip()) > 0:
-				self.stream.write('\n' + self.label + ': ')
-			self._log(msg, newline)
+			try:
+				if len(self.label) > 0 and newline and len(str(msg).strip()) > 0:
+					self.stream.write('\n' + self.label + ': ')
+				self._log(msg, newline)
+			except UnicodeEncodeError:
+				pass
 
 	def Log(self, msg, newline = True):
 		self._log(msg, newline)

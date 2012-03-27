@@ -34,14 +34,20 @@ def ItemNoteCode(row):
 #        return "3"
 #    return "" # fallback
 
-def MainEntryPersonalName_a(row):
-	firstname = row[0].strip(",.")
-	lastname = row[1].strip(",.")
-	result = ""
+def MainEntryPersonalName(row):
+	firstname = row[0]
+	lastname = row[1]
+	fullname = row[2]
+	year = row[3]
+	result = "$a"
 	if lastname:
-		result += lastname
+		result += lastname.strip(",.")
 	if firstname:
-		result += ", " + firstname + "."
+		result += ", " + firstname.strip(",.") + "."
+	if fullname:
+		result += " $q(%s)" % fullname.strip()
+	if year:
+		result += " $d%s" % year.strip
 	return result
 
 
@@ -128,25 +134,34 @@ def Process856(row):
 		if resource.startswith("DigiData"): # already urlencoded
 			return urlpath + resource
 		else:
-			if resource.find("DigiData"):
+			try:
 				resource = resource[resource.index("DigiData"):]
 				return urlpath + urllib.quote(resource.replace('\\', '/'), "/()")
-			else:
-				return string # give up
+			except ValueError:
+				return string
 	return string
 
 
-def Process700a(row):
+def Process700(row):
 	formOfEntry = row[0]
 	firstName = row[1]
-	lastName = row[2]
-	if formOfEntry == '0':
-		return firstName + ' ' + lastName.strip('.') + '.'
+	lastName = row[2] if row[2] is not None else ""
+	fullerName = row[3]
+	year = row[4]
+	result = "$a"
+	if formOfEntry == '0' and firstName and lastName:
+		result += firstName + ' ' + lastName.strip('.') + '.'
 	else:
-		if len(firstName) > 0:
-			return lastName + ', ' + firstName
+		if firstName and len(firstName) > 0:
+			result += lastName + ', ' + firstName
 		else:
-			return lastName
+			result += lastName
+	if year:
+		result += "$d" + year
+	if fullerName:
+		result += "$q(%s)" % fullerName
+	return result
+
 
 
 
