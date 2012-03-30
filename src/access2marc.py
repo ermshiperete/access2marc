@@ -13,12 +13,14 @@ class Processor(object):
 		self._checkInstructions()
 		self.conn = pyodbc.connect(dbconnstring)
 		self.db = self.conn.cursor()
+		self.itemids = []
 
 
 	def LoadItemIDs(self):
 		# query the db for a list of all item ids to extract
 		self.itemids = [
-				row.ItemID for row in self.db.execute('SELECT ItemID FROM Item')]
+				row.ItemID for row in self.db.execute('SELECT TOP 300 ItemID FROM Item')]
+				#row.ItemID for row in self.db.execute('SELECT Item.ItemID FROM Item INNER JOIN Holding ON Item.ItemID = Holding.ItemID')]
 				#row.ItemID for row in self.db.execute('SELECT ItemID FROM Item WHERE ItemID = 7321')]
 				#row.ItemID for row in self.db.execute("SELECT ItemID FROM Item WHERE ItemID = 2502")]
 
