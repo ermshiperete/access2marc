@@ -1,85 +1,85 @@
-"Tag","FFPosition","Subfield","I1_SQLSelect","I2_SQLSelect","DefaultValue","SQLSelect","SQLFrom","SQLWhere","SQLEnd","Python","SubfieldRepeatable"
-0,5,,,,"n",,,,,,"No"
-0,6,,,,,"ItemType.ItemTypeCode","ItemType INNER JOIN Item ON ItemType.ItemTypeID = Item.ItemTypeID",,,,"No"
-0,7,,,,,"BiblioLevel.BiblioLevelCode","BiblioLevel INNER JOIN Item ON BiblioLevel.BiblioLevelID = Item.BiblioLevelID","BiblioLevel.BiblioLevelID = Item.BiblioLevelID",,,"No"
-0,9,,,,"a",,,,,,"No"
-0,17,,,,,,,,,,"No"
-0,18,,,,"a",,,,,,"No"
-8,"00-05",,,,,"Format(Item.LastUpdate,'yymmdd')","Item",,,,"No"
-8,6,,,,,"DateType.DateTypeID","DateType INNER JOIN Item ON DateType.DateTypeID = Item.DateTypeID",,,,"No"
-8,"07-10",,,,,"Date1","Item","Date1 <> 'None'",,,"No"
-8,"11-14",,,,,"Date2","Item","Date2 <> 'None'",,,"No"
-8,"15-17",,,,,"Item.PubCountryCode","Item",,,,"No"
-8,"18-21",,,,,"MARC_008_18-21","Item","MARC_008_18-21 <> ''",,,"No"
-8,22,,,,,,,,,,"No"
-8,23,,,,,"MARC_008_23","Item","MARC_008_23 <> ''",,,"No"
-8,"24-27",,,,,"MARC_008_24-27","Item","MARC_008_24-27 <> ''",,,"No"
-8,28,,,,,,,,,,"No"
-8,29,,,,,,,,,,"No"
-8,30,,,,,,,,,,"No"
-8,31,,,,,"[Note].NoteText","[Note] INNER JOIN Item ON Item.ItemID = [Note].ItemID",,,"ItemNoteCode","No"
-8,32,,,,,,,,,,"No"
-8,33,,,,0,,,,,,"No"
-8,34,,,,0,,,,,,"No"
-8,"35-37",,,,,"MARC_008_35-37","Item","MARC_008_35-37 <>''",,,"No"
-8,38,,,,,,,,,,"No"
-8,39,,,,"d",,,,,,"No"
-20,,"a",,,,"[ISBN].[ISBNNumber] & ' ' & [ISBN].[ISBNComment]","ISBN INNER JOIN Item ON Item.ItemID = ISBN.ItemID",,,,"Yes"
-35,,"a",,,,"Item.ItemID","Item",,,,
-22,,"a",,,,"Item.ISSN","Item",,,,"Yes"
-40,,"a",,,"DTL",,,,,,"No"
-82,,"a",0,4,,"ClassNumber.ClassNumberText","Item INNER JOIN (Holding INNER JOIN ClassNumber ON ClassNumber.ClassNumberID = Holding.ClassNumberID) ON Item.ItemID = Holding.ItemID",,"Limit 1",,"Yes
-(Unique in Access DB)"
-100,,"inline","Name.FormofEntry",,,"Name.FirstName, Name.LastName, Name.FullerName, Name.YearOfBirth, Name.FormofEntry","Name INNER JOIN (Item INNER JOIN ItemName ON Item.ItemID = ItemName.ItemID) ON Name.NameID = ItemName.NameID","ItemName.NameSequence = 1 AND Name.NameTypeID = 2 AND ItemName.FunctionID = 2",,"MainEntryPersonalName","No"
-110,,"a",2,,,"[Name]![LastName] & Iif([Name]![FirstName]<>'',' ' & [Name]![FirstName]) & IIf(Right([Name]![LastName] & [Name]![FirstName],1)<>'.','.')","Name INNER JOIN (Item INNER JOIN ItemName ON Item.ItemID = ItemName.ItemID) ON Name.NameID = ItemName.NameID","(((ItemName.NameSequence)=1) AND ((Name.NameTypeID)=3) AND ((ItemName.FunctionID)=2)) OR (((ItemName.NameSequence)=1) AND ((Name.NameTypeID)=3) AND ((ItemName.FunctionID)=3 OR ItemName.FunctionID=11))",,,"No"
-111,,"a",2,,,"Trim([Name]![LastName])","Name INNER JOIN (Item INNER JOIN ItemName ON Item.ItemID = ItemName.ItemID) ON Name.NameID = ItemName.NameID","(((Name.LastName) Is Not Null) AND ((Name.NameTypeID)=4) AND ((ItemName.NameSequence)=1) AND ((ItemName.FunctionID)=2)) OR (((Name.NameTypeID)=4) AND ((ItemName.NameSequence)=1) AND ((ItemName.FunctionID)=12))",,,"No"
-111,,"c",,,,"Iif([Name]![NamePrefix]<>'', Trim([Name]![NamePrefix])) & IIf(Right(Trim([Name]![LastName]) & Iif([Name]![NamePrefix]<>'', Trim([Name]![NamePrefix])),1)<>'.','.')","Name INNER JOIN (Item INNER JOIN ItemName ON Item.ItemID = ItemName.ItemID) ON Name.NameID = ItemName.NameID","(((Name.LastName) Is Not Null) AND ((Name.NameTypeID)=4) AND ((ItemName.NameSequence)=1) AND ((ItemName.FunctionID)=2)) OR (((Name.NameTypeID)=4) AND ((ItemName.NameSequence)=1) AND ((ItemName.FunctionID)=12))",,,"No"
-111,,"d",,,,"Iif([Name]![YearOfBirth]<>'', Trim([Name]![YearOfBirth]))","Name INNER JOIN (Item INNER JOIN ItemName ON Item.ItemID = ItemName.ItemID) ON Name.NameID = ItemName.NameID","(((Name.LastName) Is Not Null) AND ((Name.NameTypeID)=4) AND ((ItemName.NameSequence)=1) AND ((ItemName.FunctionID)=2)) OR (((Name.NameTypeID)=4) AND ((ItemName.NameSequence)=1) AND ((ItemName.FunctionID)=12))",,,"No"
-130,,"inline",0,,,"""$a"" & [Title]![TitleText] & ' ' & IIF(Title.MARCOther <> '', Replace([Title]![MARCother],'^','$'))","Item INNER JOIN Title ON Item.ItemID = Title.ItemID","(Title.TitleTypeID)=12",,,"No"
-240,,"inline",1,0,,"""$a"" & [Title]![TitleText] & ' ' & IIF(Title.MARCOther <> '', Replace([Title]![MARCother],'^','$'))","Item INNER JOIN Title ON Item.ItemID = Title.ItemID","(Title.TitleTypeID)=16",,,"No"
-242,,"a",0,"Title.TitleOffset",,"Title.TitleText","Item INNER JOIN Title ON Item.ItemID = Title.ItemID","Title.TitleTypeID = 5 OR Title.TitleTypeID = 10",,,"Yes"
-245,,"a",0,"Item.TitleOffset",,"MainTitle, StatementOfResp","Item",,,"Process245a","No"
-245,,"b",,,,"MainTitle, StatementOfResp","Item",,,"Process245b","No"
-245,,"c",,,,"StatementOfResp & '.'","Item","StatementOfResp <> ''",,"Process245c","No"
-246,,"a",1,4,,"Title.TitleText","Item INNER JOIN Title ON Item.ItemID = Title.ItemID","Title.TitleTypeID=3",,,"Yes"
-250,,"a",,,,"Iif(Right([Item]![Edition],1)='.',[Item]![Edition],[Item]![Edition] & '.')","Item","(Item.Edition) Is Not Null",,,"No"
-260,,"a",,,,"PublisherPlace.PublisherPlaceName & IIF(Publisher.PublisherName <> '', ': ')","PublisherPlace INNER JOIN (Publisher INNER JOIN (Item INNER JOIN ItemPublisher ON Item.ItemID = ItemPublisher.ItemID) ON Publisher.PublisherID = ItemPublisher.PublisherID) ON PublisherPlace.PublisherPlaceID = ItemPublisher.PublisherPlaceID","PublisherPlace.PublisherPlaceName <> '???'",,,"Yes for Serial"
-260,,"b",,,,"Publisher.PublisherName & IIF(Item.Date1 <> '', ', ')","PublisherPlace INNER JOIN (Publisher INNER JOIN (Item INNER JOIN ItemPublisher ON Item.ItemID = ItemPublisher.ItemID) ON Publisher.PublisherID = ItemPublisher.PublisherID) ON PublisherPlace.PublisherPlaceID = ItemPublisher.PublisherPlaceID","Publisher.PublisherName <> '???'",,,"Yes for Serial"
-260,,"c",,,,"Item.Date1 & IIF(Item.Date2 <> '',', ' & Item.Date2)","PublisherPlace INNER JOIN (Publisher INNER JOIN (Item INNER JOIN ItemPublisher ON Item.ItemID = ItemPublisher.ItemID) ON Publisher.PublisherID = ItemPublisher.PublisherID) ON PublisherPlace.PublisherPlaceID = ItemPublisher.PublisherPlaceID","Item.Date1 <> ''",,,"Yes for Serial"
-300,,"inline",,,,"IIF(Item.Extent <> '', ""$a"" & Trim(Item.Extent)) & IIF(Item.IllustrativeMatter <> '', ' :$b' & Trim(Item.IllustrativeMatter)) & IIF(Item.OtherMaterial <> '', ' + $e' & Trim(Item.OtherMaterial))","Item",,,,"Yes"
-440,,"a",,,,"Trim(Series.SeriesText) & IIF(Item.SequentialDesignation <> '', ' ;')","Series INNER JOIN (Item INNER JOIN ItemSeries ON Item.ItemID = ItemSeries.ItemID) ON Series.SeriesID = ItemSeries.SeriesID","Series.SeriesText <> ''",,,"Yes"
-440,,"v",,,,"Trim(Item.SequentialDesignation)","Item","Item.SequentialDesignation <> ''",,,"Yes"
-500,,"a",,,,"Note.NoteText","Item INNER JOIN [Note] ON Item.ItemID = [Note].ItemID","Note.NumNote=500",,,"Yes"
-502,,"a",,,,"Note.NoteText","Item INNER JOIN [Note] ON Item.ItemID = Note.ItemID","Note.NumNote=502",,,"Yes"
-504,,"a",,,,"Note.NoteText","Item INNER JOIN [Note] ON Item.ItemID = Note.ItemID","Note.NumNote=504",,,"Yes"
-505,,"a",0,,,"Note.NoteText","Item INNER JOIN [Note] ON Item.ItemID = Note.ItemID","Note.NumNote=505",,,"Yes"
-520,,"a",,,,"Note.NoteText","Item INNER JOIN [Note] ON Item.ItemID = Note.ItemID","Note.NumNote=520",,,"Yes"
-610,,"a",2,4,,"Subject.SubjectTextFor6XX","Subject INNER JOIN (Item INNER JOIN ItemSubject ON Item.ItemID = ItemSubject.ItemID) ON Subject.SubjectID = ItemSubject.SubjectID","Subject.SubjectTypeID=10",,,"Yes"
-630,,"inline",0,0,,"""$a"" & Title.TitleText & IIF(Title.MARCother <> '', Replace([Title]![MARCother],'^','$'))","Item INNER JOIN Title ON Item.ItemID = Title.ItemID","Title.TitleTypeID=15 AND Title.TitleText <> ''",,,"Yes"
-650,,"inline",0,0,,"Subject.SubjectTextFor6XX","Subject INNER JOIN (Item INNER JOIN ItemSubject ON Item.ItemID = ItemSubject.ItemID) ON Subject.SubjectID = ItemSubject.SubjectID","Subject.SubjectTypeID=50",,,"Yes"
-651,,"inline",,0,,"Subject.SubjectTextFor6XX","Subject INNER JOIN (Item INNER JOIN ItemSubject ON Item.ItemID = ItemSubject.ItemID) ON Subject.SubjectID = ItemSubject.SubjectID","Subject.SubjectTypeID=51",,,"Yes"
-700,,"inline","Name.FormofEntry",,,"Name.FormofEntry, Name.Firstname, Name.Lastname, Name.FullerName, Name.YearOfBirth","Name INNER JOIN (Item INNER JOIN ItemName ON Item.ItemID = ItemName.ItemID) ON Name.NameID = ItemName.NameID","Name.FormofEntry IS NOT NULL",,"Process700","Yes"
-710,,"a",2,,,"[Name]![LastName] & IIf([Name]![FirstName]<>'',' ' & [Name]![FirstName]) & IIf(Right([Name]![LastName] & [Name]![FirstName],1)<>'.','.')","Name INNER JOIN (Item INNER JOIN ItemName ON Item.ItemID = ItemName.ItemID) ON Name.NameID = ItemName.NameID","Name.NameTypeID = 3 AND ItemName.NameSequence > 1",,,"Yes"
-711,,"inline",2,,,"""$a"" & Name.LastName & IIF(Name.YearOfBirth IS NOT NULL, ""$d"" & Name.YearOfBirth) & IIF(Name.FirstName IS NOT NULL OR Name.NamePrefix IS NOT NULL, ""$c"" & IIF(IsNull(Name.FirstName), Name.NamePrefix, Name.FirstName))","Name INNER JOIN (Item INNER JOIN ItemName ON Item.ItemID = ItemName.ItemID) ON Name.NameID = ItemName.NameID","Name.NameTypeID = 4 AND ItemName.NameSequence > 1",,,"Yes"
-856,,"u",1,,,"Item.URI_FileLocat","Item",,,"Process856","Yes"
-926,,"a",,,,"Trim(Language.LanguageName)","[Language] INNER JOIN (Item INNER JOIN ItemLanguage ON Item.ItemID = ItemLanguage.ItemID) ON Language.LanguageID = ItemLanguage.LanguageID","Language.LanguageName <> ''",,,"Yes"
-926,,"c",,,,"Language.EthnologueCode","[Language] INNER JOIN (Item INNER JOIN ItemLanguage ON Item.ItemID = ItemLanguage.ItemID) ON Language.LanguageID = ItemLanguage.LanguageID","Language.EthnologueCode <> ''",,,"Yes"
-926,,"x",,,,"Language.LanguageComment","[Language] INNER JOIN (Item INNER JOIN ItemLanguage ON Item.ItemID = ItemLanguage.ItemID) ON Language.LanguageID = ItemLanguage.LanguageID","Language.LanguageComment <> ''",,,"Yes"
-952,,0,,,0,,,,,,"Yes"
-952,,1,,,0,"Holding.Status","Item INNER JOIN Holding ON Item.ItemID = Holding.ItemID","Holding.Status = 'M'",,,"Yes"
-952,,2,,,"ddc",,,,,,"Yes"
-952,,4,,,0,"Holding.Status","Item INNER JOIN Holding ON Item.ItemID = Holding.ItemID","Holding.Status = 'R'",,,"Yes"
-952,,7,,,,"Trim(ShelfLocation.ShelfLocationName)","Item INNER JOIN (ShelfLocation INNER JOIN Holding ON ShelfLocation.ShelfLocationID = Holding.ShelfLocationID) ON Item.ItemID = Holding.ItemID",,,,
-952,,"a",,,,"Choose(Holding.InventoryLocID,'','BKK','CMX', '', '')","Item INNER JOIN Holding ON Item.ItemID = Holding.ItemID","Holding.InventoryLocID IS NOT NULL",,,"Yes"
-952,,"b",,,,"Choose(Holding.LocationID, '', 'BKK', 'CMX', '', '')","Item INNER JOIN Holding ON Item.ItemID = Holding.ItemID","Holding.LocationID IS NOT NULL",,,"Yes"
-952,,"c",,,,"Trim(ShelfLocation.ShelfLocationName)","Item INNER JOIN (ShelfLocation INNER JOIN Holding ON ShelfLocation.ShelfLocationID = Holding.ShelfLocationID) ON Item.ItemID = Holding.ItemID","ShelfLocation.ShelfLocationName <> '???'",,,"Yes"
-952,,"d",,,,"Format(Holding.LastUpdate,'yyyy-mm-dd')","Item INNER JOIN Holding ON Item.ItemID = Holding.ItemID",,,,"Yes"
-952,,"h",,,,"Holding.Enumeration","Item INNER JOIN Holding ON Item.ItemID = Holding.ItemID","Holding.Enumeration <> ''",,,"Yes"
-952,,"o",,,,"Trim(ClassNumber.ClassNumberText & ' ' & Holding.ItemPart)","Item INNER JOIN (ClassNumber INNER JOIN Holding ON ClassNumber.ClassNumberID = Holding.ClassNumberID) ON Item.ItemID = Holding.ItemID",,,,"Yes"
-952,,"p",,,,"Trim(Holding.HoldingNumber)","Item INNER JOIN Holding ON Item.ItemID = Holding.ItemID",,,,"Yes"
-952,,"t",,,,"Switch(Right([Holding]![HoldingNumber],1)='b','2',Right([Holding]![HoldingNumber],1)='c','3',Right([Holding]![HoldingNumber],1)='d','4',Right([Holding]![HoldingNumber],1)='e','5',Right([Holding]![HoldingNumber],1)='f','6',Right([Holding]![HoldingNumber],1)='g','7')","Item INNER JOIN Holding ON Item.ItemID = Holding.ItemID","Len(Holding.HoldingNumber) > 6",,,"Yes"
-952,,"x",,,,"Trim(Holding.HoldingComment)","Item INNER JOIN Holding ON Item.ItemID = Holding.ItemID","Holding.HoldingComment <> ''",,,"Yes"
-952,,"y",,,"BKS","SELECT ""SER""","Subject INNER JOIN ((Item INNER JOIN Holding ON Item.ItemID = Holding.ItemID) INNER JOIN ItemSubject ON Item.ItemID = ItemSubject.ItemID) ON Subject.SubjectID = ItemSubject.SubjectID","Subject.SubjectTextfor6XX Like ""*$xPeriodical""",,,"Yes"
-961,,"a",,,,"Item.SecurityLevel","Item",,,,"No"
-975,,"a",,,,"Item.ItemNumber","Item",,,,"No"
-977,,"a",,,,"Item.UpdatedBy","Item",,,,"No"
+"Tag","FFPosition","Subfield","I1_SQLSelect","I2_SQLSelect","DefaultValue","SQLSelect","SQLFrom","SQLWhere","SQLEnd","Python"
+0,5,,,,"n",,,,,
+0,6,,,,,"ItemType.ItemTypeCode","ItemType INNER JOIN Item ON ItemType.ItemTypeID = Item.ItemTypeID",,,
+0,7,,,,,"BiblioLevel.BiblioLevelCode","BiblioLevel INNER JOIN Item ON BiblioLevel.BiblioLevelID = Item.BiblioLevelID","BiblioLevel.BiblioLevelID = Item.BiblioLevelID",,
+0,9,,,,"a",,,,,
+0,17,,,,,,,,,
+0,18,,,,"a",,,,,
+8,"00-05",,,,,"Format(Item.LastUpdate,'yymmdd')","Item",,,
+8,6,,,,,"DateType.DateTypeID","DateType INNER JOIN Item ON DateType.DateTypeID = Item.DateTypeID",,,
+8,"07-10",,,,,"Date1","Item","Date1 <> 'None'",,
+8,"11-14",,,,,"Date2","Item","Date2 <> 'None'",,
+8,"15-17",,,,,"Item.PubCountryCode","Item",,,
+8,"18-21",,,,,"MARC_008_18-21","Item","MARC_008_18-21 <> ''",,
+8,22,,,,,,,,,
+8,23,,,,,"MARC_008_23","Item","MARC_008_23 <> ''",,
+8,"24-27",,,,,"MARC_008_24-27","Item","MARC_008_24-27 <> ''",,
+8,28,,,,,,,,,
+8,29,,,,,,,,,
+8,30,,,,,,,,,
+8,31,,,,,"[Note].NoteText","[Note] INNER JOIN Item ON Item.ItemID = [Note].ItemID",,,"ItemNoteCode"
+8,32,,,,,,,,,
+8,33,,,,0,,,,,
+8,34,,,,0,,,,,
+8,"35-37",,,,,"MARC_008_35-37","Item","MARC_008_35-37 <>''",,
+8,38,,,,,,,,,
+8,39,,,,"d",,,,,
+20,,"a",,,,"[ISBN].[ISBNNumber] & ' ' & [ISBN].[ISBNComment]","ISBN INNER JOIN Item ON Item.ItemID = ISBN.ItemID",,,
+35,,"a",,,,"Item.ItemID","Item",,,
+22,,"a",,,,"Item.ISSN","Item",,,
+40,,"a",,,"DTL",,,,,
+82,,"a",0,4,,"ClassNumber.ClassNumberText","Item INNER JOIN (Holding INNER JOIN ClassNumber ON ClassNumber.ClassNumberID = Holding.ClassNumberID) ON Item.ItemID = Holding.ItemID",,"Limit 1",
+100,,"inline","Name.FormofEntry",,,"Name.FirstName, Name.LastName, Name.FullerName, Name.YearOfBirth, Name.FormofEntry","Name INNER JOIN (Item INNER JOIN ItemName ON Item.ItemID = ItemName.ItemID) ON Name.NameID = ItemName.NameID","ItemName.NameSequence = 1 AND Name.NameTypeID = 2 AND ItemName.FunctionID = 2",,"MainEntryPersonalName"
+110,,"a",2,,,"[Name]![LastName] & Iif([Name]![FirstName]<>'',' ' & [Name]![FirstName]) & IIf(Right([Name]![LastName] & [Name]![FirstName],1)<>'.','.')","Name INNER JOIN (Item INNER JOIN ItemName ON Item.ItemID = ItemName.ItemID) ON Name.NameID = ItemName.NameID","(((ItemName.NameSequence)=1) AND ((Name.NameTypeID)=3) AND ((ItemName.FunctionID)=2)) OR (((ItemName.NameSequence)=1) AND ((Name.NameTypeID)=3) AND ((ItemName.FunctionID)=3 OR ItemName.FunctionID=11))",,
+111,,"a",2,,,"Trim([Name]![LastName])","Name INNER JOIN (Item INNER JOIN ItemName ON Item.ItemID = ItemName.ItemID) ON Name.NameID = ItemName.NameID","(((Name.LastName) Is Not Null) AND ((Name.NameTypeID)=4) AND ((ItemName.NameSequence)=1) AND ((ItemName.FunctionID)=2)) OR (((Name.NameTypeID)=4) AND ((ItemName.NameSequence)=1) AND ((ItemName.FunctionID)=12))",,
+111,,"c",,,,"Iif([Name]![NamePrefix]<>'', Trim([Name]![NamePrefix])) & IIf(Right(Trim([Name]![LastName]) & Iif([Name]![NamePrefix]<>'', Trim([Name]![NamePrefix])),1)<>'.','.')","Name INNER JOIN (Item INNER JOIN ItemName ON Item.ItemID = ItemName.ItemID) ON Name.NameID = ItemName.NameID","(((Name.LastName) Is Not Null) AND ((Name.NameTypeID)=4) AND ((ItemName.NameSequence)=1) AND ((ItemName.FunctionID)=2)) OR (((Name.NameTypeID)=4) AND ((ItemName.NameSequence)=1) AND ((ItemName.FunctionID)=12))",,
+111,,"d",,,,"Iif([Name]![YearOfBirth]<>'', Trim([Name]![YearOfBirth]))","Name INNER JOIN (Item INNER JOIN ItemName ON Item.ItemID = ItemName.ItemID) ON Name.NameID = ItemName.NameID","(((Name.LastName) Is Not Null) AND ((Name.NameTypeID)=4) AND ((ItemName.NameSequence)=1) AND ((ItemName.FunctionID)=2)) OR (((Name.NameTypeID)=4) AND ((ItemName.NameSequence)=1) AND ((ItemName.FunctionID)=12))",,
+130,,"inline",0,,,"""$a"" & [Title]![TitleText] & ' ' & IIF(Title.MARCOther <> '', Replace([Title]![MARCother],'^','$'))","Item INNER JOIN Title ON Item.ItemID = Title.ItemID","(Title.TitleTypeID)=12",,
+240,,"inline",1,0,,"""$a"" & [Title]![TitleText] & ' ' & IIF(Title.MARCOther <> '', Replace([Title]![MARCother],'^','$'))","Item INNER JOIN Title ON Item.ItemID = Title.ItemID","(Title.TitleTypeID)=16",,
+242,,"a",0,"Title.TitleOffset",,"Title.TitleText","Item INNER JOIN Title ON Item.ItemID = Title.ItemID","Title.TitleTypeID = 5 OR Title.TitleTypeID = 10",,
+245,,"a",0,"Item.TitleOffset",,"MainTitle, StatementOfResp","Item",,,"Process245a"
+245,,"b",,,,"MainTitle, StatementOfResp","Item",,,"Process245b"
+245,,"c",,,,"StatementOfResp & '.'","Item","StatementOfResp <> ''",,"Process245c"
+246,,"a",1,4,,"Title.TitleText","Item INNER JOIN Title ON Item.ItemID = Title.ItemID","Title.TitleTypeID=3",,
+250,,"a",,,,"Iif(Right([Item]![Edition],1)='.',[Item]![Edition],[Item]![Edition] & '.')","Item","(Item.Edition) Is Not Null",,
+260,,"a",,,,"PublisherPlace.PublisherPlaceName & IIF(Publisher.PublisherName <> '', ': ')","PublisherPlace INNER JOIN (Publisher INNER JOIN (Item INNER JOIN ItemPublisher ON Item.ItemID = ItemPublisher.ItemID) ON Publisher.PublisherID = ItemPublisher.PublisherID) ON PublisherPlace.PublisherPlaceID = ItemPublisher.PublisherPlaceID","PublisherPlace.PublisherPlaceName <> '???'",,
+260,,"b",,,,"Publisher.PublisherName & IIF(Item.Date1 <> '', ', ')","PublisherPlace INNER JOIN (Publisher INNER JOIN (Item INNER JOIN ItemPublisher ON Item.ItemID = ItemPublisher.ItemID) ON Publisher.PublisherID = ItemPublisher.PublisherID) ON PublisherPlace.PublisherPlaceID = ItemPublisher.PublisherPlaceID","Publisher.PublisherName <> '???'",,
+260,,"c",,,,"Item.Date1 & IIF(Item.Date2 <> '',', ' & Item.Date2)","PublisherPlace INNER JOIN (Publisher INNER JOIN (Item INNER JOIN ItemPublisher ON Item.ItemID = ItemPublisher.ItemID) ON Publisher.PublisherID = ItemPublisher.PublisherID) ON PublisherPlace.PublisherPlaceID = ItemPublisher.PublisherPlaceID","Item.Date1 <> ''",,
+300,,"inline",,,,"IIF(Item.Extent <> '', ""$a"" & Trim(Item.Extent)) & IIF(Item.IllustrativeMatter <> '', ' :$b' & Trim(Item.IllustrativeMatter)) & IIF(Item.OtherMaterial <> '', ' + $e' & Trim(Item.OtherMaterial))","Item",,,
+440,,"a",,,,"Trim(Series.SeriesText) & IIF(Item.SequentialDesignation <> '', ' ;')","Series INNER JOIN (Item INNER JOIN ItemSeries ON Item.ItemID = ItemSeries.ItemID) ON Series.SeriesID = ItemSeries.SeriesID","Series.SeriesText <> ''",,
+440,,"v",,,,"Trim(Item.SequentialDesignation)","Item","Item.SequentialDesignation <> ''",,
+500,,"a",,,,"Note.NoteText","Item INNER JOIN [Note] ON Item.ItemID = [Note].ItemID","Note.NumNote=500",,
+502,,"a",,,,"Note.NoteText","Item INNER JOIN [Note] ON Item.ItemID = Note.ItemID","Note.NumNote=502",,
+504,,"a",,,,"Note.NoteText","Item INNER JOIN [Note] ON Item.ItemID = Note.ItemID","Note.NumNote=504",,
+505,,"a",0,,,"Note.NoteText","Item INNER JOIN [Note] ON Item.ItemID = Note.ItemID","Note.NumNote=505",,
+520,,"a",,,,"Note.NoteText","Item INNER JOIN [Note] ON Item.ItemID = Note.ItemID","Note.NumNote=520",,
+610,,"a",2,4,,"Subject.SubjectTextFor6XX","Subject INNER JOIN (Item INNER JOIN ItemSubject ON Item.ItemID = ItemSubject.ItemID) ON Subject.SubjectID = ItemSubject.SubjectID","Subject.SubjectTypeID=10",,
+630,,"inline",0,0,,"""$a"" & Title.TitleText & IIF(Title.MARCother <> '', Replace([Title]![MARCother],'^','$'))","Item INNER JOIN Title ON Item.ItemID = Title.ItemID","Title.TitleTypeID=15 AND Title.TitleText <> ''",,
+650,,"inline",0,0,,"Subject.SubjectTextFor6XX","Subject INNER JOIN (Item INNER JOIN ItemSubject ON Item.ItemID = ItemSubject.ItemID) ON Subject.SubjectID = ItemSubject.SubjectID","Subject.SubjectTypeID=50",,
+651,,"inline",,0,,"Subject.SubjectTextFor6XX","Subject INNER JOIN (Item INNER JOIN ItemSubject ON Item.ItemID = ItemSubject.ItemID) ON Subject.SubjectID = ItemSubject.SubjectID","Subject.SubjectTypeID=51",,
+700,,"inline","Name.FormofEntry",,,"Name.FormofEntry, Name.Firstname, Name.Lastname, Name.FullerName, Name.YearOfBirth","Name INNER JOIN (Item INNER JOIN ItemName ON Item.ItemID = ItemName.ItemID) ON Name.NameID = ItemName.NameID","Name.FormofEntry IS NOT NULL",,"Process700"
+710,,"a",2,,,"[Name]![LastName] & IIf([Name]![FirstName]<>'',' ' & [Name]![FirstName]) & IIf(Right([Name]![LastName] & [Name]![FirstName],1)<>'.','.')","Name INNER JOIN (Item INNER JOIN ItemName ON Item.ItemID = ItemName.ItemID) ON Name.NameID = ItemName.NameID","Name.NameTypeID = 3 AND ItemName.NameSequence > 1",,
+711,,"inline",2,,,"""$a"" & Name.LastName & IIF(Name.YearOfBirth IS NOT NULL, ""$d"" & Name.YearOfBirth) & IIF(Name.FirstName IS NOT NULL OR Name.NamePrefix IS NOT NULL, ""$c"" & IIF(IsNull(Name.FirstName), Name.NamePrefix, Name.FirstName))","Name INNER JOIN (Item INNER JOIN ItemName ON Item.ItemID = ItemName.ItemID) ON Name.NameID = ItemName.NameID","Name.NameTypeID = 4 AND ItemName.NameSequence > 1",,
+856,,"u",1,,,"Item.URI_FileLocat","Item",,,"Process856"
+926,,"a",,,,"Trim(Language.LanguageName)","[Language] INNER JOIN (Item INNER JOIN ItemLanguage ON Item.ItemID = ItemLanguage.ItemID) ON Language.LanguageID = ItemLanguage.LanguageID","Language.LanguageName <> ''",,
+926,,"c",,,,"Language.EthnologueCode","[Language] INNER JOIN (Item INNER JOIN ItemLanguage ON Item.ItemID = ItemLanguage.ItemID) ON Language.LanguageID = ItemLanguage.LanguageID","Language.EthnologueCode <> ''",,
+926,,"x",,,,"Language.LanguageComment","[Language] INNER JOIN (Item INNER JOIN ItemLanguage ON Item.ItemID = ItemLanguage.ItemID) ON Language.LanguageID = ItemLanguage.LanguageID","Language.LanguageComment <> ''",,
+952,,0,,,0,,,,,
+952,,1,,,0,"Holding.Status","Item INNER JOIN Holding ON Item.ItemID = Holding.ItemID","Holding.Status = 'M'",,
+952,,2,,,"ddc",,,,,
+952,,4,,,0,"Holding.Status","Item INNER JOIN Holding ON Item.ItemID = Holding.ItemID","Holding.Status = 'R'",,
+952,,7,,,,"Trim(ShelfLocation.ShelfLocationName)","Item INNER JOIN (ShelfLocation INNER JOIN Holding ON ShelfLocation.ShelfLocationID = Holding.ShelfLocationID) ON Item.ItemID = Holding.ItemID",,,
+952,,"a",,,,"Choose(Holding.InventoryLocID,'','BKK','CMX', '', '')","Item INNER JOIN Holding ON Item.ItemID = Holding.ItemID","Holding.InventoryLocID IS NOT NULL",,
+952,,"b",,,,"Choose(Holding.LocationID, '', 'BKK', 'CMX', '', '')","Item INNER JOIN Holding ON Item.ItemID = Holding.ItemID","Holding.LocationID IS NOT NULL",,
+952,,"c",,,,"Trim(ShelfLocation.ShelfLocationName)","Item INNER JOIN (ShelfLocation INNER JOIN Holding ON ShelfLocation.ShelfLocationID = Holding.ShelfLocationID) ON Item.ItemID = Holding.ItemID","ShelfLocation.ShelfLocationName <> '???'",,
+952,,"d",,,,"Format(Holding.LastUpdate,'yyyy-mm-dd')","Item INNER JOIN Holding ON Item.ItemID = Holding.ItemID",,,
+952,,"h",,,,"Holding.Enumeration","Item INNER JOIN Holding ON Item.ItemID = Holding.ItemID","Holding.Enumeration <> ''",,
+952,,"i",,,,"Holding.HoldingNum","Item INNER JOIN Holding ON Item.ItemID = Holding.ItemID","Holding.HoldingNum <> ''",,
+952,,"o",,,,"IFF(Holding.ItemPart = ""aaa"", ShelfLocation.ShelfLocationName, SelfTrim(ClassNumber.ClassNumberText & ' ' & Holding.ItemPart))","Item INNER JOIN (ClassNumber INNER JOIN (ShelfLocation INNER JOIN Holding ON ShelfLocation.ShelfLocationID = Holding.ShelfLocationID) ON ClassNumber.ClassNumberID = Holding.ClassNumberID) ON Item.ItemID = Holding.ItemID",,,
+952,,"p",,,,"Trim(Holding.HoldingNumber)","Item INNER JOIN Holding ON Item.ItemID = Holding.ItemID",,,
+952,,"t",,,,"Switch(Right([Holding]![HoldingNumber],1)='b','2',Right([Holding]![HoldingNumber],1)='c','3',Right([Holding]![HoldingNumber],1)='d','4',Right([Holding]![HoldingNumber],1)='e','5',Right([Holding]![HoldingNumber],1)='f','6',Right([Holding]![HoldingNumber],1)='g','7')","Item INNER JOIN Holding ON Item.ItemID = Holding.ItemID","Len(Holding.HoldingNumber) > 6",,
+952,,"x",,,,"Trim(Holding.HoldingComment)","Item INNER JOIN Holding ON Item.ItemID = Holding.ItemID","Holding.HoldingComment <> ''",,
+952,,"y",,,"BK","IFF(Holding.ItemPart = ""aaa"", ""AT"", IFF(Subject.SubjectTextfor6XX LIKE ""*$xPeriodical"", ""SER"", ""BK""))","Subject INNER JOIN ((Item INNER JOIN Holding ON Item.ItemID = Holding.ItemID) INNER JOIN ItemSubject ON Item.ItemID = ItemSubject.ItemID) ON Subject.SubjectID = ItemSubject.SubjectID",,,
+961,,"a",,,,"Item.SecurityLevel","Item",,,
+975,,"a",,,,"Item.ItemNumber","Item",,,
+977,,"a",,,,"Item.UpdatedBy","Item",,,
