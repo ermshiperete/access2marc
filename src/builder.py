@@ -118,6 +118,7 @@ class SQLQuery(Logger):
 		Logger.__init__(self, sys.stdout, DEBUGMODE, 'Query')
 		self.qo = qo
 		self.id = id
+		self.sql = None #useful for accessing the sql externally
 
 		self.map = dict()
 		for e in line:
@@ -169,6 +170,7 @@ class SQLQuery(Logger):
 
 	def _execSQL(self, qselect, qfrom, qwhere, qend, customFuncEnd=''):
 		sql = "%s %s %s %s" % (qselect, qfrom, qwhere, qend)
+		self.sql = sql
 		self.Debug(sql)
 		try:
 			self.qo.execute(sql)
@@ -193,7 +195,7 @@ class SQLQuery(Logger):
 						self.Debug("after %s = %s" % (funccall, result))
 					except AttributeError, err:
 						self.Debug(str(err))
-						self.Debug("Notice: %s isn't defined in custom.py.  Skipping." % funccall)
+						self.Log("Warning: %s isn't defined in custom.py.  Skipping." % funccall)
 				processedrows.append(result)
 		return processedrows
 
@@ -379,6 +381,7 @@ class MarcFieldBuilder(Logger):
 			else:
 				if len(data) > 1:
 					self.Log("Warning: item_%s : field_%s : Expected 1 but SQL returned %s rows: %s" % (self.ItemID, self.Tag, len(data), str(data)))
+					self.Log("Offending SQL: %s" % q.sql)
 					return self._processSubfieldResult(subfield, data[0])
 				if len(data) > 0 and data[0] is not None and len(data[0]) > 0:
 					return self._processSubfieldResult(subfield, data[0])
@@ -497,15 +500,16 @@ class MarcHoldingsBuilder(MarcFieldBuilder):
 		self.Indicators = [' ', ' ']
 
 		for holdingID in self.HoldingIDs:
-			subfields = list()
-			for line in self.Instructions:
-				self.Debug("%s:%s %s = " % (holdingID, self.Tag, line['Subfield']))
+			if holdingID is not None:
+				subfields = list()
+				for line in self.Instructions:
+					self.Debug("%s:%s %s = " % (holdingID, self.Tag, line['Subfield']))
 
-				# normally this just returns one subfield data, unless this is a repeatable subfield
-				holdingResult = self._doHoldingQuery(holdingID, line)
-				subfields.extend(holdingResult)
-				self.Debug(holdingResult)
-			self.ListOfSubFields.append(subfields)
+					# normally this just returns one subfield data, unless this is a repeatable subfield
+					holdingResult = self._doHoldingQuery(holdingID, line)
+					subfields.extend(holdingResult)
+					self.Debug(holdingResult)
+				self.ListOfSubFields.append(subfields)
 
 
 	def _doHoldingQuery(self, holdingID, line):
