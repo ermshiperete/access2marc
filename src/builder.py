@@ -24,9 +24,10 @@ DEBUGMODE = False
 
 
 class MarcRecordBuilder(Logger):
-	def __init__(self, itemID, instructions, queryObject):
+	def __init__(self, itemID, holdings, instructions, queryObject):
 		Logger.__init__(self, sys.stdout, DEBUGMODE, 'RecBuild')
 		self.ItemID = itemID
+		self.HoldingIDs = holdings # a list of holdingIDs
 		self.qo = queryObject
 		self.Fields = list()
 		self.Instructions = instructions
@@ -43,6 +44,9 @@ class MarcRecordBuilder(Logger):
 			if int(tag) < 10: # fixed field
 				self.Fields.append(
 						MarcFixedFieldBuilder(self.ItemID, inst, self.qo))
+			elif isHoldingField(tag):
+				self.Fields.append(
+						MarcHoldingsBuilder(self.ItemID, self.HoldingIDs, inst, self.qo))
 			else: # regular field
 				self.Fields.append(
 						MarcFieldBuilder(self.ItemID, inst, self.qo))
@@ -122,8 +126,9 @@ class SQLQuery(Logger):
 
 
 	def FetchData(self):
+		# returns a list, in case this is a repeatable field
 		qselect = "SELECT %s" % self.map['SQLSelect']
-		return self._fetch(qselect, 'data')
+		return self._fetch(qselect)
 
 
 	def FetchIndicator(self, indicator):
@@ -138,7 +143,20 @@ class SQLQuery(Logger):
 			return " "
 
 
-	def _fetch(self, qselect, mode='data'):
+	def FetchHolding(self, holdingID):
+		# returns a dictionary of holdingID -> value in case a record has more than one holding
+		qselect = "SELECT %s" % self.map['SQLSelect']
+		qfrom = "FROM %s" % self.map['SQLFrom']
+		qend = self.map['SQLEnd']
+		witemid = "Item.ItemID = %s AND Holding.HoldingID = %s" % (self.id, holdingID)
+		if self.map['SQLWhere'].strip():
+			qwhere = "WHERE (%s) AND %s" % (self.map['SQLWhere'], witemid)
+		else:
+			qwhere = "WHERE %s" % witemid
+		return self._execSQL(qselect, qfrom, qwhere, qend)
+
+
+	def _fetch(self, qselect, customFuncEnd=''):
 		qfrom = "FROM %s" % self.map['SQLFrom']
 		witemid = "Item.ItemID = %s" % self.id
 		if self.map['SQLWhere'].strip():
@@ -146,6 +164,10 @@ class SQLQuery(Logger):
 		else:
 			qwhere = "WHERE %s" % witemid
 		qend = self.map['SQLEnd']
+		return self._execSQL(qselect, qfrom, qwhere, qend, customFuncEnd)
+
+
+	def _execSQL(self, qselect, qfrom, qwhere, qend, customFuncEnd=''):
 		sql = "%s %s %s %s" % (qselect, qfrom, qwhere, qend)
 		self.Debug(sql)
 		try:
@@ -162,10 +184,9 @@ class SQLQuery(Logger):
 			if row and len(row) > 0 and row[0] is not None:
 				result = unicode(row[0]).strip()
 				if 'custom' in sys.modules and self.map['Python']:
-					funcend = ""
-					if mode != 'data':
-						funcend = "_" + mode
-					funccall = "custom.%s(row)" % (self.map['Python'] + funcend)
+					if customFuncEnd:
+						customFuncEnd = '_' + customFuncEnd
+					funccall = "custom.%s(row)" % (self.map['Python'] + customFuncEnd)
 					try:
 						result = eval(funccall)
 						self.Debug("before %s = %s" % (funccall, str(row)))
@@ -437,7 +458,7 @@ class MarcFieldBuilder(Logger):
 
 	def GetMarcField(self):
 		listToReturn = []
-		if isRepeatableField(self.Tag):
+		if isRepeatableField(self.Tag) or isHoldingField(self.Tag):
 			for f in self.ListOfSubFields:
 				if len(f) % 2 != 0:
 					raise BuilderException("item_%s : tag_%s : Subfields list must contain pairs of subfield and it's value: %s" % (self.ItemID, self.Tag, str(f)))
@@ -452,6 +473,76 @@ class MarcFieldBuilder(Logger):
 
 
 
+class MarcHoldingsBuilder(MarcFieldBuilder):
+	def __init__(self, itemID, holdingIDs, instructions, queryObject):
+		Logger.__init__(self, sys.stdout, DEBUGMODE, 'HoldBuild')
+		self.ItemID = itemID
+		self.HoldingIDs = holdingIDs
+		self.SubFields = list() # intentionally left empty and not used: only referenced in GetMarcFields
+
+		# get tag from first line
+		self.Tag = instructions[0]['Tag']
+
+		# A list of SubField lists, since these are holdings and a title may have more than one holding
+		# that this field is repeatable
+		# eg. list of these lists: ['a', 'the title', 'c', 'the author']
+		self.ListOfSubFields = list()
+
+		self.qo = queryObject
+		self.Instructions = instructions
+		self._build()
+
+
+	def _build(self):
+		self.Indicators = [' ', ' ']
+
+		for holdingID in self.HoldingIDs:
+			subfields = list()
+			for line in self.Instructions:
+				self.Debug("%s:%s %s = " % (holdingID, self.Tag, line['Subfield']))
+
+				# normally this just returns one subfield data, unless this is a repeatable subfield
+				holdingResult = self._doHoldingQuery(holdingID, line)
+				subfields.extend(holdingResult)
+				self.Debug(holdingResult)
+			self.ListOfSubFields.append(subfields)
+
+
+	def _doHoldingQuery(self, holdingID, line):
+		subfield = line['Subfield'].strip("$| ")
+		defaultValue = line['DefaultValue'].strip()
+		if line['SQLSelect']:
+			q = SQLQuery(self.qo, self.ItemID, line)
+
+			# data is a list, in case there are repeatable subfields
+			data = q.FetchHolding(holdingID)
+
+			# if this is a repeatable subfield, we want to process all data returned as subfields of this field
+			if line['SubfieldRepeatable'].lower().find('yes') > -1:
+				result = list()
+				for item in data:
+					if item:
+						result.extend(self._processSubfieldResult(subfield, item))
+				return result
+
+			# otherwise just process the first one returned (and warn if more than one returned)
+			else:
+				if len(data) > 1:
+					self.Log("Warning: item_%s : field_%s : Expected 1 but SQL returned %s rows: %s" % (self.ItemID, self.Tag, len(data), str(data)))
+					return self._processSubfieldResult(subfield, data[0])
+				if len(data) > 0 and data[0] is not None and len(data[0]) > 0:
+					return self._processSubfieldResult(subfield, data[0])
+				if defaultValue:
+					return (subfield, defaultValue)
+				return ()
+
+		elif defaultValue:
+			# if there is a default value, use that
+			return ( subfield, defaultValue )
+		else:
+			return ()
+
+
 
 
 
@@ -461,6 +552,13 @@ class MarcFieldBuilder(Logger):
 def isRepeatableField(tag):
 	repeatabletaglist = ('013', '015', '016', '017', '020', '022', '024', '025', '026', '027', '028', '032', '033', '034', '035', '037', '041', '046', '047', '048', '050', '051', '052', '055', '060', '061', '070', '071', '072', '074', '080', '082', '084', '085', '086', '088', '210', '222', '242', '246', '247', '255', '257', '258', '260', '264', '270', '300', '307', '321', '336', '337', '338', '340', '342', '343', '344', '345', '346', '347', '351', '352', '355', '362', '363', '365', '366', '377', '380', '381', '382', '383', '490', '500', '501', '502', '504', '505', '506', '508', '510', '511', '513', '515', '516', '518', '520', '521', '524', '525', '526', '530', '533', '534', '535', '536', '538', '540', '541', '542', '544', '545', '546', '547', '550', '552', '555', '556', '561', '562', '563', '565', '567', '580', '581', '583', '584', '585', '586', '588', '600', '610', '611', '630', '648', '650', '651', '653', '654', '655', '656', '657', '658', '662', '700', '710', '711', '720', '730', '740', '751', '752', '753', '754', '760', '762', '765', '767', '770', '772', '773', '774', '775', '776', '777', '780', '785', '786', '787', '800', '810', '811', '830', '843', '845', '850', '852', '853', '854', '855', '856', '863', '864', '865', '866', '867', '868', '876', '877', '878', '880', '886', '887')
 	if tag in repeatabletaglist:
+		return True
+	else:
+		return False
+
+def isHoldingField(tag):
+	holdingtags = ('952')
+	if tag in holdingtags:
 		return True
 	else:
 		return False

@@ -13,16 +13,16 @@ class Processor(object):
 		self._checkInstructions()
 		self.conn = pyodbc.connect(dbconnstring)
 		self.db = self.conn.cursor()
-		self.itemids = []
+		self.items = dict()
 
 
 	def LoadItemIDs(self):
 		# query the db for a list of all item ids to extract
-		self.itemids = [
-				row.ItemID for row in self.db.execute('SELECT TOP 300 ItemID FROM Item')]
-				#row.ItemID for row in self.db.execute('SELECT Item.ItemID FROM Item INNER JOIN Holding ON Item.ItemID = Holding.ItemID')]
-				#row.ItemID for row in self.db.execute('SELECT ItemID FROM Item WHERE ItemID = 7321')]
-				#row.ItemID for row in self.db.execute("SELECT ItemID FROM Item WHERE ItemID = 2502")]
+		for row in self.db.execute('SELECT Item.ItemID, Holding.HoldingID FROM Item LEFT JOIN Holding ON Item.ItemID = Holding.ItemID ORDER BY Item.ItemID'):
+			if self.items.has_key(row.ItemID) and row.HoldingID not in self.items[row.ItemID]:
+				self.items[row.ItemID].append(row.HoldingID)
+			else:
+				self.items[row.ItemID] = [row.HoldingID]
 
 
 	def _checkInstructions(self):
@@ -38,8 +38,8 @@ class Processor(object):
 	def WriteMarcRecords(self, filename):
 		#with codecs.open(filename, 'w', 'utf-8') as out:
 		with open(filename, 'wb') as out:
-			for id in self.itemids:
-				builder = MarcRecordBuilder(id, self.instructions, self.db)
+			for id in self.items:
+				builder = MarcRecordBuilder(id, self.items[id], self.instructions, self.db)
 				rec = builder.GetMarcRecord()
 				out.write(rec.as_marc())
 
