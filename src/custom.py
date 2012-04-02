@@ -138,7 +138,7 @@ def Process008Date2(row):
 
 def Process856(row):
 	string = row[0]
-	urlpath = "http://library.asia.sil.org/e-resources/mseag/"
+	urlpath = "http://library.mseag.org/e-resources/mseag/"
 	m = REGEX856URL.search(string)
 	if m:
 		resource = m.group(1)
