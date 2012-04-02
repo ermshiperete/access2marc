@@ -80,7 +80,7 @@
 952,,"p",,,,"Trim(Holding.HoldingNumber)","Item INNER JOIN Holding ON Item.ItemID = Holding.ItemID",,,,"Yes"
 952,,"t",,,,"Switch(Right([Holding]![HoldingNumber],1)='b','2',Right([Holding]![HoldingNumber],1)='c','3',Right([Holding]![HoldingNumber],1)='d','4',Right([Holding]![HoldingNumber],1)='e','5',Right([Holding]![HoldingNumber],1)='f','6',Right([Holding]![HoldingNumber],1)='g','7')","Item INNER JOIN Holding ON Item.ItemID = Holding.ItemID","Len(Holding.HoldingNumber) > 6",,,"Yes"
 952,,"x",,,,"Trim(Holding.HoldingComment)","Item INNER JOIN Holding ON Item.ItemID = Holding.ItemID","Holding.HoldingComment <> ''",,,"Yes"
-952,,"y",,,"BK","IIF(Holding.ItemPart = ""aaa"", ""AT"", IIF(Subject.SubjectTextfor6XX LIKE ""*$xPeriodical"", ""SER"", ""BK""))","Subject INNER JOIN ((Item INNER JOIN Holding ON Item.ItemID = Holding.ItemID) INNER JOIN ItemSubject ON Item.ItemID = ItemSubject.ItemID) ON Subject.SubjectID = ItemSubject.SubjectID",,,,"Yes"
+952,,"y",,,"BK","TOP 1 IIF(Holding.ItemPart = ""aaa"", ""AT"", IIF(Subject.SubjectTextfor6XX LIKE ""*$xPeriodical"", ""SR"", ""BK""))","Subject INNER JOIN ((Item INNER JOIN Holding ON Item.ItemID = Holding.ItemID) INNER JOIN ItemSubject ON Item.ItemID = ItemSubject.ItemID) ON Subject.SubjectID = ItemSubject.SubjectID",,,,"Yes"
 961,,"a",,,,"Item.SecurityLevel","Item",,,,"No"
 975,,"a",,,,"Item.ItemNumber","Item",,,,"No"
 977,,"a",,,,"Item.UpdatedBy","Item",,,,"No"
