@@ -194,8 +194,9 @@ class SQLQuery(Logger):
 						self.Debug("before %s = %s" % (funccall, str(row)))
 						self.Debug("after %s = %s" % (funccall, result))
 					except AttributeError, err:
-						self.Debug(str(err))
-						self.Log("Warning: %s isn't defined in custom.py.  Skipping." % funccall)
+						if (funccall.find("indicator") == -1):
+							self.Debug(str(err))
+							self.Log("Warning: %s isn't defined in custom.py.  Skipping." % funccall)
 				processedrows.append(result)
 		return processedrows
 
