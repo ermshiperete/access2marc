@@ -40,7 +40,7 @@
 242,,"a",0,"Title.TitleOffset",,"Title.TitleText","Item INNER JOIN Title ON Item.ItemID = Title.ItemID","Title.TitleTypeID = 5 OR Title.TitleTypeID = 10",,,"Yes"
 245,,"a",0,"Item.TitleOffset",,"MainTitle, StatementOfResp","Item",,,"Process245a","No"
 245,,"b",,,,"MainTitle, StatementOfResp","Item",,,"Process245b","No"
-245,,"c",,,,"StatementOfResp & '.'","Item","StatementOfResp <> ''",,"Process245c","No"
+245,,"c",,,,"StatementOfResp & '.'","Item","StatementOfResp <> ''",,,"No"
 246,,"a",1,4,,"Title.TitleText","Item INNER JOIN Title ON Item.ItemID = Title.ItemID","Title.TitleTypeID=3",,,"Yes"
 250,,"a",,,,"Iif(Right([Item]![Edition],1)='.',[Item]![Edition],[Item]![Edition] & '.')","Item","(Item.Edition) Is Not Null",,,"No"
 260,,"a",,,,"PublisherPlace.PublisherPlaceName & IIF(Publisher.PublisherName <> '', ': ')","PublisherPlace INNER JOIN (Publisher INNER JOIN (Item INNER JOIN ItemPublisher ON Item.ItemID = ItemPublisher.ItemID) ON Publisher.PublisherID = ItemPublisher.PublisherID) ON PublisherPlace.PublisherPlaceID = ItemPublisher.PublisherPlaceID","PublisherPlace.PublisherPlaceName <> '???'",,,"Yes for Serial"
