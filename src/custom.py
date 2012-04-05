@@ -174,6 +174,16 @@ def Process700(row):
 	return result
 
 
+def Process952h(row):
+	line = row[0]
+	line = line.replace("^a", "vol. ")
+	line = line.replace("^b", " no. ")
+	line = line.replace("^i", " ")
+	line = line.replace("^j", " ")
+	return line
+
+
+
 
 
 if __name__ == "__main__":
