@@ -52,5 +52,5 @@ if __name__ == '__main__':
 	processor = Processor('c:/src/access2marc/data_map.csv', connstring)
 
 	processor.LoadItemIDs()
-	processor.WriteMarcRecords('c:/src/access2marc/output.marc')
+	processor.WriteMarcRecords('c:/src/access2marc/output.mrc')
 	print('Finished')
