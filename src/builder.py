@@ -231,12 +231,12 @@ class MarcFixedFieldBuilder(Logger):
 				actualsize = len(data)
 				for x in range(startpos, endpos + 1):
 					if ctr < actualsize:
-						datamap.append((x, data[ctr]))
+						datamap.append((str(x), data[ctr]))
 					else:
-						datamap.append((x, " "))
+						datamap.append((str(x), " "))
 					ctr += 1
 			else:
-				datamap.append((positions, data))
+				datamap.append((str(positions), data))
 			return datamap
 
 
@@ -276,7 +276,7 @@ class MarcFixedFieldBuilder(Logger):
 		data = ''
 		for i in range(0, 100):
 			pos = str(i)
-			if pos in self.DataChar and self.DataChar[pos].strip() != '':
+			if pos in self.DataChar.keys() and self.DataChar[pos].strip() != '':
 				data += self.DataChar[pos]
 			else:
 				data += ' '
